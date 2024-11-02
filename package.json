@@ -23,7 +23,7 @@
     "build": "tsup",
     "clean": "rimraf dist",
     "dev": "tsup --watch",
-    "lint": "eslint .",
+    "lint": "biome lint ./src ./test",
     "test": "vitest",
     "types:check": "tsc --noEmit",
     "lint:prettier": "prettier --cache --check --ignore-path .gitignore --ignore-path .prettierignore .",
@@ -39,6 +39,7 @@
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@changesets/cli": "^2.27.9",
     "@types/node": "22.8.6",
     "prettier": "^3.3.3",

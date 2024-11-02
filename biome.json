@@ -1,0 +1,13 @@
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "useImportType": "error",
+        "useExportType": "error"
+      },
+      "complexity": {
+        "noForEach": "off"
+      }
+    }
+  }
+}
