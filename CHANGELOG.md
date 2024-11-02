@@ -1,5 +1,11 @@
 # next-validate-link
 
+## 1.0.2
+
+### Patch Changes
+
+- b1552ba: Update github repo information
+
 ## 1.0.1
 
 ### Patch Changes
