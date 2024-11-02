@@ -27,7 +27,9 @@
     "test": "vitest",
     "types:check": "tsc --noEmit",
     "lint:prettier": "prettier --cache --check --ignore-path .gitignore --ignore-path .prettierignore .",
-    "prettier": "prettier --cache --write --list-different --ignore-path .gitignore --ignore-path .prettierignore ."
+    "prettier": "prettier --cache --write --list-different --ignore-path .gitignore --ignore-path .prettierignore .",
+    "release": "pnpm run build && changeset publish",
+    "version": "changeset version && pnpm install --lockfile-only"
   },
   "dependencies": {
     "fast-glob": "^3.3.1",
