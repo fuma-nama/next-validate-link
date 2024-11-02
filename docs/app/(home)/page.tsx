@@ -30,7 +30,7 @@ export default function Page() {
                 Get Started
               </Link>
               <a
-                href="https://github.com/fuma-nama/fumadocs/tree/dev/packages/next-validate-links"
+                href="https://github.com/fuma-nama/next-validate-link"
                 target="_blank"
                 rel="noreferrer noopener"
                 className={cn(buttonVariants({ variant: 'outline' }))}
@@ -182,19 +182,10 @@ export default function Page() {
               Start using next-validate-link today and ensure your Next.js app's
               documentation is always up-to-date.
             </p>
-            <div className="space-x-4">
+            <div className="flex flex-row items-center gap-2">
               <Link href="/docs" className={cn(buttonVariants())}>
                 Get Started
               </Link>
-              <a
-                href="https://github.com/fuma-nama/fumadocs/tree/dev/packages/next-validate-links"
-                target="_blank"
-                rel="noreferrer noopener"
-                className={cn(buttonVariants({ variant: 'outline' }))}
-              >
-                <Github className="mr-2 size-4" />
-                View on GitHub
-              </a>
             </div>
           </div>
         </div>
