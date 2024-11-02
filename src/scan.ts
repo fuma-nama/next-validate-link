@@ -65,7 +65,7 @@ export async function scanURLs(options: ScanOptions): Promise<ScanResult> {
 
     out.forEach((entry) => {
       if (typeof entry.url === 'string') {
-        result.urls.set('/' + entry.url, entry.meta ?? defaultMeta);
+        result.urls.set(`/${entry.url}`, entry.meta ?? defaultMeta);
       } else {
         result.fallbackUrls.push({
           url: new RegExp(`^\\/${entry.url.source}$`),
@@ -103,13 +103,14 @@ function populate(
         ? defaultPopulateOptional
         : defaultPopulate;
 
-      segmentParams.forEach((param) => {
+      for (const param of segmentParams) {
         const value = param.value;
+
         const prefix = value
           ? [...current, ...(Array.isArray(value) ? value : [value])].join('/')
           : [...current, '(.+)'].join('\\/');
 
-        next.forEach((populated) => {
+        for (const populated of next) {
           let url: string | RegExp;
 
           if (!value) {
@@ -137,8 +138,8 @@ function populate(
             url,
             meta: populated.meta ?? param,
           });
-        });
-      });
+        }
+      }
 
       return out;
     }

@@ -104,7 +104,7 @@ test('validate links: invalid fragments', async () => {
       [
         {
           path: 'a.md',
-          content: `[hello](/docs/hello/world#invalid)`,
+          content: "[hello](/docs/hello/world#invalid)",
         },
       ],
       { scanned },
