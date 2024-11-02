@@ -4,10 +4,7 @@ import type { ValidateError } from '@/validate';
 /**
  * Print validation errors
  */
-export function printErrors(
-  errors: ValidateError[],
-  throwError = false,
-) {
+export function printErrors(errors: ValidateError[], throwError = false) {
   let totalErrors = 0;
   const logs: string[] = [];
 
