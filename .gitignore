@@ -1,0 +1,6 @@
+node_modules
+dist
+out
+.source
+.next
+next-env.d.ts
