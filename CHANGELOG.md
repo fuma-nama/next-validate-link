@@ -1,5 +1,13 @@
 # next-validate-link
 
+## 1.1.0
+
+### Minor Changes
+
+- 3ad408f: Support checking external links
+- a5493f8: Support multiple params
+- 7905275: Support GFM style links
+
 ## 1.0.2
 
 ### Patch Changes
