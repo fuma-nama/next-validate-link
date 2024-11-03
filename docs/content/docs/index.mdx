@@ -123,3 +123,21 @@ const scanned = await scanURLs({
   },
 });
 ```
+
+### External Urls
+
+To validate external urls, enable it.
+
+```ts
+import fg from 'fast-glob';
+import { printErrors, validateFiles } from 'next-validate-link';
+
+printErrors(
+  await validateFiles(await fg('content/**/*.{md,mdx}'), {
+    scanned,
+    checkExternal: true,
+  }),
+  // exit with code 1 if errors detected
+  true,
+);
+```

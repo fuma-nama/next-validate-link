@@ -3,7 +3,8 @@
     "rules": {
       "style": {
         "useImportType": "error",
-        "useExportType": "error"
+        "useExportType": "error",
+        "noUnusedTemplateLiteral": "off"
       },
       "complexity": {
         "noForEach": "off"

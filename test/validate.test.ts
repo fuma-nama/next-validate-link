@@ -125,3 +125,35 @@ test('validate links: invalid fragments', async () => {
     ]
   `);
 });
+
+test('validate links: external urls', async () => {
+  expect(
+    await validateFiles(
+      [
+        {
+          path: 'a.md',
+          content: '[test](https://google.com) [test](http://localhost:3000)',
+        },
+        {
+          path: 'b.md',
+          content: '[test](https://invalid.com)',
+        },
+      ],
+      { scanned, checkExternal: true },
+    ),
+  ).toMatchInlineSnapshot(`
+    [
+      {
+        "detected": [
+          [
+            "https://invalid.com",
+            1,
+            1,
+            "not-found",
+          ],
+        ],
+        "file": "b.md",
+      },
+    ]
+  `);
+});

@@ -4,6 +4,7 @@ import { visit } from 'unist-util-visit';
 import type { ScanResult } from '@/scan';
 import path from 'node:path';
 import matter from 'gray-matter';
+import { checkExternalUrl } from './check-external-url';
 
 const processor = remark();
 
@@ -12,11 +13,12 @@ export type ValidateError = {
   detected: DetectedError[];
 };
 
+type ErrorReason = 'not-found' | 'invalid-fragment' | 'invalid-query';
 type DetectedError = [
   url: string,
   line: number,
   column: number,
-  reason: 'not-found' | 'invalid-fragment' | 'invalid-query',
+  reason: ErrorReason,
 ];
 
 export type ValidateConfig = {
@@ -38,6 +40,13 @@ export type ValidateConfig = {
    * @defaultValue false
    */
   ignoreQuery?: boolean;
+
+  /**
+   * Check external urls
+   *
+   * @defaultValue false
+   */
+  checkExternal?: boolean;
 };
 
 type File =
@@ -71,14 +80,16 @@ export async function validateFiles(
         : file;
 
     if (!mdExtensions.includes(path.extname(finalFile.path))) {
-      console.warn(`format unsupported: ${finalFile.path}`);
+      console.warn(
+        `format unsupported: ${finalFile.path}, supported: ${mdExtensions.join(', ')}`,
+      );
 
       return { file: finalFile.path, detected: [] };
     }
 
     return {
       file: finalFile.path,
-      detected: validateMarkdown(finalFile.content, config),
+      detected: await validateMarkdown(finalFile.content, config),
     };
   }
 
@@ -87,69 +98,78 @@ export async function validateFiles(
   );
 }
 
-export function validateMarkdown(content: string, config: ValidateConfig) {
+export async function validateMarkdown(
+  content: string,
+  config: ValidateConfig,
+) {
   const tree = processor.parse({ value: matter({ content }).content });
   const detected: DetectedError[] = [];
+  const tasks: Promise<void>[] = [];
 
   visit(tree, 'link', (node) => {
     // ignore generated nodes
-    if (!node.position || node.url.match(/https?:\/\//)) return;
+    if (!node.position) return;
+    const pos = node.position;
 
-    const [urlWithoutFragment, fragment] = node.url.split('#', 2);
-    const [url, query] = urlWithoutFragment.split('?', 2);
-
-    if (url.length === 0) return;
-
-    let meta = config.scanned.urls.get(url);
-    if (!meta) {
-      meta = config.scanned.fallbackUrls.find((fallbackUrl) => {
-        return fallbackUrl.url.test(url);
-      })?.meta;
-    }
-
-    if (meta) {
-      const validFragment =
-        config.ignoreFragment ||
-        !fragment ||
-        !meta.hashes ||
-        meta.hashes.includes(fragment);
-
-      if (!validFragment) {
-        detected.push([
-          node.url,
-          node.position.start.line,
-          node.position.start.column,
-          'invalid-fragment',
-        ]);
-        return;
-      }
-
-      const validQuery =
-        config.ignoreQuery ||
-        !query ||
-        !meta.queries ||
-        meta.queries.some(
-          (item) => new URLSearchParams(item).toString() === query,
-        );
-
-      if (!validQuery) {
-        detected.push([
-          node.url,
-          node.position.start.line,
-          node.position.start.column,
-          'invalid-query',
-        ]);
-        return;
-      }
-    } else {
-      detected.push([
-        node.url,
-        node.position.start.line,
-        node.position.start.column,
-        'not-found',
-      ]);
-    }
+    tasks.push(
+      detect(node.url, config).then((result) => {
+        if (result) {
+          detected.push([node.url, pos.start.line, pos.start.column, result]);
+        }
+      }),
+    );
   });
 
+  await Promise.all(tasks);
+
   return detected;
+}
+
+export async function detect(
+  href: string,
+  config: ValidateConfig,
+): Promise<ErrorReason | undefined> {
+  if (href.match(/https?:\/\//)) {
+    if (config.checkExternal) {
+      const isValid = await checkExternalUrl(href);
+
+      if (!isValid) return 'not-found';
+    }
+
+    return;
+  }
+
+  const [pathnameWithQuery, fragment] = href.split('#', 2);
+  const [pathname, query] = pathnameWithQuery.split('?', 2);
+
+  if (pathname.length === 0) return;
+
+  let meta = config.scanned.urls.get(pathname);
+  if (!meta) {
+    meta = config.scanned.fallbackUrls.find((fallbackUrl) => {
+      return fallbackUrl.url.test(pathname);
+    })?.meta;
+  }
+
+  if (!meta) return 'not-found';
+
+  const validFragment =
+    config.ignoreFragment ||
+    !fragment ||
+    !meta.hashes ||
+    meta.hashes.includes(fragment);
+
+  if (!validFragment) {
+    return 'invalid-fragment';
+  }
+
+  const validQuery =
+    config.ignoreQuery ||
+    !query ||
+    !meta.queries ||
+    meta.queries.some((item) => new URLSearchParams(item).toString() === query);
+
+  if (!validQuery) {
+    return 'invalid-query';
+  }
 }
