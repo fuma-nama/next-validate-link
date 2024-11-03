@@ -159,8 +159,114 @@ test('scan pages with dynamic params', async () => {
       "urls": Map {
         "/" => {},
         "/docs" => {},
-        "/blog" => {
-          "value": [],
+        "/blog" => {},
+      },
+    }
+  `);
+});
+
+test('scan pages with multiple params', async () => {
+  const scanned = await scanURLs({
+    pages: [
+      'page.tsx',
+      'projects/[lang]/[id]/page.tsx',
+      'blog/[lang]/[...slug]/page.tsx',
+      'docs/[lang]/[[...slug]]/page.tsx',
+    ],
+    populate: {
+      'projects/[lang]/[id]': [
+        {
+          value: {
+            lang: 'en',
+            id: 'hello',
+          },
+        },
+        {
+          value: {
+            lang: 'en',
+            id: 'world',
+          },
+        },
+        {
+          value: {
+            lang: 'cn',
+            id: 'hi',
+          },
+        },
+      ],
+      'blog/[lang]': [
+        {
+          value: { lang: 'en' },
+        },
+        {
+          value: { lang: 'cn' },
+        },
+      ],
+      'docs/[lang]/[[...slug]]': [
+        {
+          value: { lang: 'en', slug: ['hello', 'world'] },
+        },
+        {
+          value: { lang: 'cn', slug: [] },
+        },
+      ],
+    },
+  });
+
+  expect(scanned).toMatchInlineSnapshot(`
+    {
+      "fallbackUrls": [
+        {
+          "meta": {
+            "value": {
+              "lang": "en",
+            },
+          },
+          "url": /\\^\\\\/blog\\\\/en\\\\/\\(\\.\\+\\)\\$/,
+        },
+        {
+          "meta": {
+            "value": {
+              "lang": "cn",
+            },
+          },
+          "url": /\\^\\\\/blog\\\\/cn\\\\/\\(\\.\\+\\)\\$/,
+        },
+      ],
+      "urls": Map {
+        "/" => {},
+        "/projects/en/hello" => {
+          "value": {
+            "id": "hello",
+            "lang": "en",
+          },
+        },
+        "/projects/en/world" => {
+          "value": {
+            "id": "world",
+            "lang": "en",
+          },
+        },
+        "/projects/cn/hi" => {
+          "value": {
+            "id": "hi",
+            "lang": "cn",
+          },
+        },
+        "/docs/en/hello/world" => {
+          "value": {
+            "lang": "en",
+            "slug": [
+              "hello",
+              "world",
+            ],
+          },
+        },
+        "/docs/cn" => {
+          "value": {
+            "lang": "cn",
+            "slug": [],
+          },
         },
       },
     }

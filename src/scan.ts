@@ -5,7 +5,7 @@ import { stat } from 'node:fs/promises';
 export type PopulateParams = Record<
   string,
   {
-    value?: string[] | string;
+    value?: string[] | string | Record<string, string[] | string>;
     hashes?: string[];
     queries?: Record<string, string>[];
   }[]
@@ -65,10 +65,10 @@ export async function scanURLs(options: ScanOptions): Promise<ScanResult> {
 
     out.forEach((entry) => {
       if (typeof entry.url === 'string') {
-        result.urls.set(`/${entry.url}`, entry.meta ?? defaultMeta);
+        result.urls.set(entry.url, entry.meta ?? defaultMeta);
       } else {
         result.fallbackUrls.push({
-          url: new RegExp(`^\\/${entry.url.source}$`),
+          url: entry.url,
           meta: entry.meta ?? defaultMeta,
         });
       }
@@ -78,12 +78,15 @@ export async function scanURLs(options: ScanOptions): Promise<ScanResult> {
   return result;
 }
 
+const OPTIONAL_CATCH_ALL = /^\[\[\.\.\.(.+)\]\]$/;
+const CALCH_ALL = /^\[\.\.\.(.+)\]$/;
+
 function populate(
   segments: string[],
   options: ScanOptions,
-  contextPath: string[] = [],
 ): { url: string | RegExp; meta?: UrlMeta }[] {
   const current: string[] = [];
+  const paramIndexes = new Map<number, 'required' | 'optional'>();
 
   for (let i = 0; i < segments.length - 1; i++) {
     const segment = segments[i];
@@ -91,68 +94,99 @@ function populate(
     // route groups
     if (segment.startsWith('(') && segment.endsWith(')')) continue;
     if (segment.startsWith('[') && segment.endsWith(']')) {
-      const newContextPath = [...contextPath, ...segments.slice(0, i + 1)];
+      let match = OPTIONAL_CATCH_ALL.exec(segment);
 
-      const segmentPath = newContextPath.join('/');
-      const next = populate(segments.slice(i + 1), options, newContextPath);
-      const out: { url: string | RegExp; meta?: UrlMeta }[] = [];
-
-      let segmentParams = options.populate?.[segmentPath];
-
-      segmentParams ??= segment.startsWith('[[')
-        ? defaultPopulateOptional
-        : defaultPopulate;
-
-      for (const param of segmentParams) {
-        const value = param.value;
-
-        const prefix = value
-          ? [...current, ...(Array.isArray(value) ? value : [value])].join('/')
-          : [...current, '(.+)'].join('\\/');
-
-        for (const populated of next) {
-          let url: string | RegExp;
-
-          if (!value) {
-            url = new RegExp(
-              [
-                prefix,
-                typeof populated.url === 'string'
-                  ? populated.url.replaceAll('/', '\\/')
-                  : populated.url.source,
-              ]
-                .filter(Boolean)
-                .join('\\/'),
-            );
-          } else if (typeof populated.url === 'string') {
-            url = [prefix, populated.url].filter(Boolean).join('/');
-          } else {
-            url = new RegExp(
-              [prefix.replaceAll('/', '\\/'), populated.url.source]
-                .filter(Boolean)
-                .join('\\/'),
-            );
-          }
-
-          out.push({
-            url,
-            meta: populated.meta ?? param,
-          });
-        }
+      if (match) {
+        paramIndexes.set(i, 'optional');
+        current.push(match[1]);
+        continue;
       }
 
-      return out;
+      match = CALCH_ALL.exec(segment);
+      if (match) {
+        paramIndexes.set(i, 'required');
+        current.push(match[1]);
+        continue;
+      }
+
+      paramIndexes.set(i, 'required');
+      current.push(segment.slice(1, -1));
+      continue;
     }
 
     current.push(segment);
   }
+  // static
+  if (paramIndexes.size === 0) {
+    return [
+      {
+        url: `/${current.join('/')}`,
+        meta: options.meta?.[segments.join('/')],
+      },
+    ];
+  }
 
-  const segmentPath = [...contextPath, ...segments].join('/');
+  const out: { url: string | RegExp; meta?: UrlMeta }[] = [];
 
-  return [
-    {
-      url: current.join('/'),
-      meta: options.meta?.[segmentPath],
-    },
-  ];
+  const searchPath = segments;
+  let populate: PopulateParams[string] | undefined;
+  while (!populate && searchPath.length > 0) {
+    populate = options.populate?.[searchPath.join('/')];
+    searchPath.pop();
+  }
+
+  for (const param of populate ?? defaultPopulate) {
+    let clone = [...current];
+
+    if (
+      paramIndexes.size > 1 &&
+      (Array.isArray(param.value) || typeof param.value === 'string')
+    ) {
+      console.warn(
+        `path ${searchPath.join('/')} requires multiple params, an object value for populate is expected.`,
+      );
+    }
+
+    let isFallback = false;
+    for (const [index, type] of paramIndexes.entries()) {
+      const name = current[index];
+      let value: string | string[] | undefined;
+
+      if (Array.isArray(param.value) || typeof param.value === 'string') {
+        value = param.value;
+      } else if (param.value && name in param.value) {
+        value = param.value[name];
+      }
+
+      if (value) {
+        clone[index] = typeof value === 'string' ? value : value.join('/');
+        continue;
+      }
+
+      if (type === 'optional') {
+        if (index !== current.length - 1)
+          throw new Error('Invalid position of optional catch-all');
+
+        // without param (optional case)
+        out.push({
+          url: `/${clone.slice(0, -1).join('/')}`,
+          meta: param,
+        });
+      }
+
+      clone[index] = '(.+)';
+      isFallback = true;
+    }
+
+    clone = clone.filter(Boolean);
+
+    out.push({
+      url: isFallback
+        ? new RegExp(`^\\/${clone.join('\\/')}$`)
+        : `/${clone.join('/')}`,
+      meta: param,
+    });
+  }
+
+  return out;
 }

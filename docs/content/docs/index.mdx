@@ -94,3 +94,32 @@ const scanned = await scanURLs({
   },
 });
 ```
+
+Each param object indicates a page, allowed hashes and queries can be specified individually.
+
+### Multiple Params
+
+When you have multiple dynamic routes, you need to use an object instead.
+
+```ts
+import { scanURLs } from 'next-validate-link';
+
+const scanned = await scanURLs({
+  populate: {
+    '[lang]/blog/[slug]': [
+      {
+        value: {
+          lang: 'en',
+          slug: 'blog-1',
+        },
+      },
+      {
+        value: {
+          lang: 'cn',
+          slug: 'blog-1',
+        },
+      },
+    ],
+  },
+});
+```
