@@ -132,11 +132,11 @@ test('validate links: external urls', async () => {
       [
         {
           path: 'a.md',
-          content: '[test](https://google.com) [test](http://localhost:3000)',
+          content: 'https://google.com http://localhost:3000',
         },
         {
           path: 'b.md',
-          content: '[test](https://invalid.com)',
+          content: 'https://invalid.com',
         },
       ],
       { scanned, checkExternal: true },

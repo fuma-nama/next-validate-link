@@ -5,8 +5,9 @@ import type { ScanResult } from '@/scan';
 import path from 'node:path';
 import matter from 'gray-matter';
 import { checkExternalUrl } from './check-external-url';
+import remarkGfm from 'remark-gfm';
 
-const processor = remark();
+const processor = remark().use(remarkGfm);
 
 export type ValidateError = {
   file: string;
