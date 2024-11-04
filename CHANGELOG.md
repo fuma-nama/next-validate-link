@@ -1,5 +1,15 @@
 # next-validate-link
 
+## 1.2.0
+
+### Minor Changes
+
+- 7e76b08: Support pages router usage in `scanURLs`
+
+### Patch Changes
+
+- 873a9a3: parse frontmatter only with files
+
 ## 1.1.0
 
 ### Minor Changes
