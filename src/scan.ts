@@ -14,8 +14,11 @@ export type PopulateParams = Record<
 export type ScanOptions = {
   /**
    * path of pages (e.g. `/docs/page.tsx`)
+   *
+   * App Router format only
    **/
   pages?: string[];
+  cwd?: string;
 
   populate?: PopulateParams;
   meta?: Record<string, UrlMeta>;
@@ -38,15 +41,37 @@ type UrlMeta = {
 const defaultMeta = {};
 const defaultPopulate: PopulateParams[string] = [{}];
 
-export async function scanURLs(options: ScanOptions): Promise<ScanResult> {
-  async function getFiles() {
-    const isSrcDirectory = await stat('src/app')
-      .then((res) => res.isDirectory())
-      .catch(() => false);
+function isDirExists(dir: string): Promise<boolean> {
+  return stat(dir)
+    .then((res) => res.isDirectory())
+    .catch(() => false);
+}
 
-    return await fg('**/page.tsx', {
-      cwd: isSrcDirectory ? path.resolve('src/app') : path.resolve('app'),
+export async function scanURLs(options: ScanOptions = {}): Promise<ScanResult> {
+  async function getFiles() {
+    const cwd = options.cwd ?? process.cwd();
+
+    const appFiles = await fg('**/page.{js,jsx,tsx}', {
+      cwd: (await isDirExists(path.join(cwd, 'src/app')))
+        ? path.join(cwd, 'src/app')
+        : path.join(cwd, 'app'),
     });
+
+    const pagesFiles = await fg('**/*.{js,jsx,tsx}', {
+      cwd: (await isDirExists(path.join(cwd, 'src/pages')))
+        ? path.join(cwd, 'src/pages')
+        : path.join(cwd, 'pages'),
+    });
+
+    return [
+      ...appFiles,
+      ...pagesFiles.map((file) => {
+        const parsed = path.parse(file);
+        if (parsed.name === 'index') return file;
+
+        return path.join(parsed.dir, parsed.name, 'page.tsx');
+      }),
+    ];
   }
 
   const result: ScanResult = { urls: new Map(), fallbackUrls: [] };

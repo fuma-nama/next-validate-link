@@ -1,22 +1,16 @@
-import fg from 'fast-glob';
 import {
   printErrors,
-  readFileFromPath,
+  readFiles,
   scanURLs,
   validateFiles,
 } from 'next-validate-link';
 import { getSlugs, parseFilePath } from 'fumadocs-core/source';
 import { getTableOfContents } from 'fumadocs-core/server';
-import fs from 'node:fs/promises';
 import path from 'node:path';
 
 async function checkLinks() {
   // we read them all at once to avoid repeated file read
-  const docsFiles = await Promise.all(
-    await fg('content/docs/**/*.{md,mdx}').then((files) =>
-      files.map(readFileFromPath),
-    ),
-  );
+  const docsFiles = await readFiles('content/docs/**/*.{md,mdx}');
 
   const scanned = await scanURLs({
     populate: {
