@@ -37,13 +37,6 @@ type UrlMeta = {
 
 const defaultMeta = {};
 const defaultPopulate: PopulateParams[string] = [{}];
-const defaultPopulateOptional: PopulateParams[string] = [
-  {},
-  {
-    // case when it's empty
-    value: [],
-  },
-];
 
 export async function scanURLs(options: ScanOptions): Promise<ScanResult> {
   async function getFiles() {

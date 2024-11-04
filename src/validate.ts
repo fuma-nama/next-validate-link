@@ -1,11 +1,10 @@
-import { readFile } from 'node:fs/promises';
 import { remark } from 'remark';
 import { visit } from 'unist-util-visit';
 import type { ScanResult } from '@/scan';
-import path from 'node:path';
-import matter from 'gray-matter';
+import * as path from 'node:path';
 import { checkExternalUrl } from './check-external-url';
 import remarkGfm from 'remark-gfm';
+import { readFileFromPath } from './sample';
 
 const processor = remark().use(remarkGfm);
 
@@ -14,8 +13,8 @@ export type ValidateError = {
   detected: DetectedError[];
 };
 
-type ErrorReason = 'not-found' | 'invalid-fragment' | 'invalid-query';
-type DetectedError = [
+export type ErrorReason = 'not-found' | 'invalid-fragment' | 'invalid-query';
+export type DetectedError = [
   url: string,
   line: number,
   column: number,
@@ -50,12 +49,12 @@ export type ValidateConfig = {
   checkExternal?: boolean;
 };
 
-type File =
-  | string
-  | {
-      path: string;
-      content: string;
-    };
+export type FileObject = {
+  path: string;
+  content: string;
+
+  data?: object;
+};
 
 /**
  * Validate markdown files
@@ -64,21 +63,14 @@ type File =
  * @param config - configurations
  */
 export async function validateFiles(
-  files: File[],
+  files: (string | FileObject)[],
   config: ValidateConfig,
 ): Promise<ValidateError[]> {
   const mdExtensions = ['.md', '.mdx'];
 
-  async function run(file: File): Promise<ValidateError> {
+  async function run(file: string | FileObject): Promise<ValidateError> {
     const finalFile =
-      typeof file === 'string'
-        ? {
-            path: file,
-            content: await readFile(file)
-              .then((res) => res.toString())
-              .catch(() => ''),
-          }
-        : file;
+      typeof file === 'string' ? await readFileFromPath(file) : file;
 
     if (!mdExtensions.includes(path.extname(finalFile.path))) {
       console.warn(
@@ -103,7 +95,7 @@ export async function validateMarkdown(
   content: string,
   config: ValidateConfig,
 ) {
-  const tree = processor.parse({ value: matter({ content }).content });
+  const tree = processor.parse({ value: content });
   const detected: DetectedError[] = [];
   const tasks: Promise<void>[] = [];
 
@@ -132,9 +124,7 @@ export async function detect(
 ): Promise<ErrorReason | undefined> {
   if (href.match(/https?:\/\//)) {
     if (config.checkExternal) {
-      const isValid = await checkExternalUrl(href);
-
-      if (!isValid) return 'not-found';
+      return await checkExternalUrl(href);
     }
 
     return;
