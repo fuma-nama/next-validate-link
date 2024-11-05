@@ -22,6 +22,7 @@ export type ScanOptions = {
 
   populate?: PopulateParams;
   meta?: Record<string, UrlMeta>;
+  extensions?: string[];
 };
 
 export type ScanResult = {
@@ -48,16 +49,19 @@ function isDirExists(dir: string): Promise<boolean> {
 }
 
 export async function scanURLs(options: ScanOptions = {}): Promise<ScanResult> {
-  async function getFiles() {
-    const cwd = options.cwd ?? process.cwd();
+  const ext = options.extensions ?? ['js', 'jsx', 'tsx', 'md', 'mdx'];
+  const cwd = options.cwd ?? process.cwd();
 
-    const appFiles = await fg('**/page.{js,jsx,tsx}', {
+  async function getFiles() {
+    const suffix = ext.length > 0? `.{${ext.join(",")}}` : '';
+
+    const appFiles = await fg(`**/page${suffix}`, {
       cwd: (await isDirExists(path.join(cwd, 'src/app')))
         ? path.join(cwd, 'src/app')
         : path.join(cwd, 'app'),
     });
 
-    const pagesFiles = await fg('**/*.{js,jsx,tsx}', {
+    const pagesFiles = await fg(`**/*${suffix}`, {
       cwd: (await isDirExists(path.join(cwd, 'src/pages')))
         ? path.join(cwd, 'src/pages')
         : path.join(cwd, 'pages'),
