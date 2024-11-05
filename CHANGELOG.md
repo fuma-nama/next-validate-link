@@ -1,5 +1,11 @@
 # next-validate-link
 
+## 1.3.0
+
+### Minor Changes
+
+- d290e80: Support custom page extensions
+
 ## 1.2.0
 
 ### Minor Changes
