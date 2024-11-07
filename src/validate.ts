@@ -5,6 +5,7 @@ import * as path from 'node:path';
 import { checkExternalUrl } from './check-external-url';
 import remarkGfm from 'remark-gfm';
 import { readFileFromPath } from './sample';
+import { resolveUrl } from './utils/url';
 
 const processor = remark().use(remarkGfm);
 
@@ -54,6 +55,11 @@ export type FileObject = {
   content: string;
 
   data?: object;
+
+  /**
+   * URL of page, required for relative url detection
+   */
+  url?: string;
 };
 
 /**
@@ -121,7 +127,10 @@ export async function validateMarkdown(
 export async function detect(
   href: string,
   config: ValidateConfig,
+  baseUrl?: string,
 ): Promise<ErrorReason | undefined> {
+  if (href.startsWith('mailto:')) return;
+
   if (href.match(/https?:\/\//)) {
     if (config.checkExternal) {
       return await checkExternalUrl(href);
@@ -131,9 +140,12 @@ export async function detect(
   }
 
   const [pathnameWithQuery, fragment] = href.split('#', 2);
-  const [pathname, query] = pathnameWithQuery.split('?', 2);
+  let [pathname, query] = pathnameWithQuery.split('?', 2);
 
   if (pathname.length === 0) return;
+  if (baseUrl && pathname.startsWith('.')) {
+    pathname = resolveUrl(baseUrl, pathname);
+  }
 
   let meta = config.scanned.urls.get(pathname);
   if (!meta) {
