@@ -4,7 +4,7 @@ import type { ScanResult } from '@/scan';
 import * as path from 'node:path';
 import { checkExternalUrl } from './check-external-url';
 import remarkGfm from 'remark-gfm';
-import { readFileFromPath } from './sample';
+import { type PathToUrl, readFileFromPath } from './sample';
 import { resolveUrl } from './utils/url';
 
 const processor = remark().use(remarkGfm);
@@ -19,7 +19,7 @@ export type DetectedError = [
   url: string,
   line: number,
   column: number,
-  reason: ErrorReason,
+  reason: ErrorReason | Error,
 ];
 
 export type ValidateConfig = {
@@ -48,6 +48,13 @@ export type ValidateConfig = {
    * @defaultValue false
    */
   checkExternal?: boolean;
+
+  /**
+   * Generate url for markdown files.
+   *
+   * Required for relative url detection.
+   */
+  pathToUrl?: PathToUrl;
 };
 
 export type FileObject = {
@@ -75,20 +82,22 @@ export async function validateFiles(
   const mdExtensions = ['.md', '.mdx'];
 
   async function run(file: string | FileObject): Promise<ValidateError> {
-    const finalFile =
-      typeof file === 'string' ? await readFileFromPath(file) : file;
+    const resolved =
+      typeof file === 'string'
+        ? await readFileFromPath(file, config.pathToUrl)
+        : file;
 
-    if (!mdExtensions.includes(path.extname(finalFile.path))) {
+    if (!mdExtensions.includes(path.extname(resolved.path))) {
       console.warn(
-        `format unsupported: ${finalFile.path}, supported: ${mdExtensions.join(', ')}`,
+        `format unsupported: ${resolved.path}, supported: ${mdExtensions.join(', ')}`,
       );
 
-      return { file: finalFile.path, detected: [] };
+      return { file: resolved.path, detected: [] };
     }
 
     return {
-      file: finalFile.path,
-      detected: await validateMarkdown(finalFile.content, config),
+      file: resolved.path,
+      detected: await validateMarkdown(resolved.content, config, resolved.url),
     };
   }
 
@@ -100,6 +109,7 @@ export async function validateFiles(
 export async function validateMarkdown(
   content: string,
   config: ValidateConfig,
+  baseUrl?: string,
 ) {
   const tree = processor.parse({ value: content });
   const detected: DetectedError[] = [];
@@ -111,11 +121,15 @@ export async function validateMarkdown(
     const pos = node.position;
 
     tasks.push(
-      detect(node.url, config).then((result) => {
-        if (result) {
-          detected.push([node.url, pos.start.line, pos.start.column, result]);
-        }
-      }),
+      detect(node.url, config, baseUrl)
+        .then((result) => {
+          if (result) {
+            detected.push([node.url, pos.start.line, pos.start.column, result]);
+          }
+        })
+        .catch((err: Error) => {
+          detected.push([node.url, pos.start.line, pos.start.column, err]);
+        }),
     );
   });
 
@@ -143,8 +157,12 @@ export async function detect(
   let [pathname, query] = pathnameWithQuery.split('?', 2);
 
   if (pathname.length === 0) return;
-  if (baseUrl && pathname.startsWith('.')) {
-    pathname = resolveUrl(baseUrl, pathname);
+  if (pathname.startsWith('.')) {
+    if (baseUrl) pathname = `/${resolveUrl(baseUrl, pathname)}`;
+    else
+      throw new Error(
+        `relative url ${pathname} cannot be resolved, you need to provide a 'url' property to file`,
+      );
   }
 
   let meta = config.scanned.urls.get(pathname);

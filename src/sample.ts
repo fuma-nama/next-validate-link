@@ -4,7 +4,12 @@ import FastGlob, { type Pattern } from 'fast-glob';
 import type { FileObject } from './validate';
 import matter from 'gray-matter';
 
-export async function readFileFromPath(file: string): Promise<
+export type PathToUrl = (path: string) => string;
+
+export async function readFileFromPath(
+  file: string,
+  pathToUrl?: PathToUrl,
+): Promise<
   FileObject & {
     data?: object;
   }
@@ -19,13 +24,19 @@ export async function readFileFromPath(file: string): Promise<
     path: file,
     data: parsed.data,
     content: parsed.content,
+    url: pathToUrl ? pathToUrl(file) : undefined,
   };
 }
 
 export async function readFiles(
   patterns: Pattern | Pattern[],
+  options: Partial<{
+    pathToUrl?: PathToUrl;
+  }> = {},
 ): Promise<FileObject[]> {
   const files = await FastGlob(patterns);
 
-  return await Promise.all(files.map(readFileFromPath));
+  return await Promise.all(
+    files.map((file) => readFileFromPath(file, options.pathToUrl)),
+  );
 }
