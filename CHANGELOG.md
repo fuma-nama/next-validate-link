@@ -1,5 +1,16 @@
 # next-validate-link
 
+## 1.4.0
+
+### Minor Changes
+
+- aa13fb6: Support base url of markdown files
+- 235e7ca: Support custom `whitelist`
+
+### Patch Changes
+
+- 94dcef1: Exclude emails `mailto:` protocol
+
 ## 1.3.0
 
 ### Minor Changes

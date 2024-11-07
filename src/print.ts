@@ -15,7 +15,7 @@ export function printErrors(errors: ValidateError[], throwError = false) {
 
     error.detected.forEach(([content, line, column, reason]) => {
       logs.push(
-        `${picocolors.bold(content)}: ${reason} at line ${line} column ${column}`,
+        `${picocolors.bold(content)}: ${reason instanceof Error ? reason.message : reason} at line ${line} column ${column}`,
       );
     });
     logs.push(picocolors.dim('------'));

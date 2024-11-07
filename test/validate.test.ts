@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest';
 import { scanURLs } from '@/scan';
 import { validateFiles } from '@/validate';
+import path from 'node:path';
 
 const scanned = await scanURLs({
   pages: [
@@ -23,6 +24,9 @@ const scanned = await scanURLs({
 });
 
 test('validate links: valid', async () => {
+  const pathToUrl = (file: string) => {
+    return path.dirname(file);
+  };
   expect(
     await validateFiles(
       [
@@ -39,10 +43,17 @@ test('validate links: valid', async () => {
           path: 'c.md',
           content: '[hello](/dynamic) [hello](/dynamic/anything)',
         },
+        {
+          path: 'd.md',
+          url: pathToUrl('dynamic/d.md'),
+          content: '[hello](./) [hello](./anything) example@example.com',
+        },
       ],
-      { scanned },
+      {
+        scanned,
+      },
     ),
-  ).lengthOf(0, 'no error');
+  ).toMatchInlineSnapshot(`[]`);
 });
 
 test('validate links: not found', async () => {

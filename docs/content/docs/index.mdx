@@ -130,14 +130,25 @@ To validate external urls, enable it.
 
 ```ts
 import fg from 'fast-glob';
-import { printErrors, validateFiles } from 'next-validate-link';
+import { validateFiles } from 'next-validate-link';
 
-printErrors(
-  await validateFiles(await fg('content/**/*.{md,mdx}'), {
-    scanned,
-    checkExternal: true,
-  }),
-  // exit with code 1 if errors detected
-  true,
-);
+await validateFiles(await fg('content/**/*.{md,mdx}'), {
+  scanned,
+  checkExternal: true,
+});
+```
+
+### Relative Urls
+
+To support relative urls, you need to specify a function that generates url based on file path.
+
+```ts
+import path from 'node:path';
+
+await validateFiles(await fg('content/**/*.{md,mdx}'), {
+  pathToUrl: (file) => {
+    // just an example
+    return path.dirname(file);
+  },
+});
 ```
