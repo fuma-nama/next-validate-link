@@ -46,7 +46,7 @@ test('validate links: valid', async () => {
         {
           path: 'd.md',
           url: pathToUrl('dynamic/d.md'),
-          content: '[hello](./) [hello](./anything)',
+          content: '[hello](./) [hello](./anything) example@example.com',
         },
       ],
       {

@@ -55,6 +55,13 @@ export type ValidateConfig = {
    * Required for relative url detection.
    */
   pathToUrl?: PathToUrl;
+
+  /**
+   * Allowed hrefs, can be:
+   * - a list of hrefs
+   * - a function that returns `true` for allowed href
+   */
+  whitelist?: string[] | ((url: string) => boolean);
 };
 
 export type FileObject = {
@@ -151,6 +158,13 @@ export async function detect(
     }
 
     return;
+  }
+
+  if (config.whitelist) {
+    if (Array.isArray(config.whitelist) && config.whitelist.includes(href))
+      return;
+    if (typeof config.whitelist === 'function' && config.whitelist(href))
+      return;
   }
 
   const [pathnameWithQuery, fragment] = href.split('#', 2);
