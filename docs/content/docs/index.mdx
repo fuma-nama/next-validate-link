@@ -34,6 +34,8 @@ printErrors(
 );
 ```
 
+The `validateFiles` function accepts a list of file paths or file objects containing its path and content.
+
 You can run this script during lint process, or before builds.
 
 ```bash
@@ -152,3 +154,17 @@ await validateFiles(await fg('content/**/*.{md,mdx}'), {
   },
 });
 ```
+
+## Utilities
+
+### `readFiles`
+
+Read files for given glob patterns, and output a list of file objects.
+
+```ts
+import { readFiles } from 'next-validate-link';
+
+const files = await readFiles('content/docs/**/*.{md,mdx}');
+```
+
+You can use it in conjunction with `validateFiles`.
