@@ -15,7 +15,7 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "packageManager": "pnpm@9.12.3",
+  "packageManager": "pnpm@9.14.3",
   "files": [
     "dist/*"
   ],
@@ -42,7 +42,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@changesets/cli": "^2.27.10",
-    "@types/node": "22.9.3",
+    "@types/node": "22.10.1",
     "prettier": "^3.3.3",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
