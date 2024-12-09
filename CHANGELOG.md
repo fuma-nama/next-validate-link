@@ -1,5 +1,12 @@
 # next-validate-link
 
+## 1.4.1
+
+### Patch Changes
+
+- 7f327ee: Bump deps
+- 7f327ee: Improve Page Router compatibility
+
 ## 1.4.0
 
 ### Minor Changes
