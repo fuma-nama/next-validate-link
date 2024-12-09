@@ -53,7 +53,7 @@ export async function scanURLs(options: ScanOptions = {}): Promise<ScanResult> {
   const cwd = options.cwd ?? process.cwd();
 
   async function getFiles() {
-    const suffix = ext.length > 0? `.{${ext.join(",")}}` : '';
+    const suffix = ext.length > 0 ? `.{${ext.join(',')}}` : '';
 
     const appFiles = await fg(`**/page${suffix}`, {
       cwd: (await isDirExists(path.join(cwd, 'src/app')))
@@ -71,7 +71,7 @@ export async function scanURLs(options: ScanOptions = {}): Promise<ScanResult> {
       ...appFiles,
       ...pagesFiles.map((file) => {
         const parsed = path.parse(file);
-        if (parsed.name === 'index') return file;
+        if (parsed.name === 'index') return path.join(parsed.dir, 'page.tsx');
 
         return path.join(parsed.dir, parsed.name, 'page.tsx');
       }),
