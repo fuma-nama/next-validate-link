@@ -3,7 +3,9 @@ import { Github } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
-import { version } from '../../../package.json';
+import packageJson from '../../../package.json';
+
+const version = packageJson.version;
 
 export default function Page() {
   return (
