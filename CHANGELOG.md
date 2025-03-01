@@ -1,5 +1,11 @@
 # next-validate-link
 
+## 1.4.2
+
+### Patch Changes
+
+- 1cf530b: update deps
+
 ## 1.4.1
 
 ### Patch Changes
