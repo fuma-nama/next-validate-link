@@ -1,10 +1,15 @@
 import './global.css';
 import { RootProvider } from 'fumadocs-ui/provider';
-import { Inter } from 'next/font/google';
+import { Geist, Geist_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 
-const inter = Inter({
+const geist = Geist({
   subsets: ['latin'],
+});
+
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
 });
 
 export const metadata = {
@@ -14,7 +19,11 @@ export const metadata = {
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={inter.className} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${geist.className} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
       <body className="flex flex-col min-h-screen">
         <RootProvider
           search={{
