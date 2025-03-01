@@ -9,13 +9,7 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
  */
 export const baseOptions: BaseLayoutProps = {
   nav: {
-    title: 'next-validate-link',
+    title: <code className="text-sm">next-validate-link</code>,
   },
-  links: [
-    {
-      text: 'Documentation',
-      url: '/docs',
-      active: 'nested-url',
-    },
-  ],
+  githubUrl: 'https://github.com/fuma-nama/next-validate-link',
 };

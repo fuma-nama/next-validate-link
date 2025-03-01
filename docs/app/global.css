@@ -1,3 +1,59 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/black.css';
+@import 'fumadocs-ui/css/preset.css';
+
+/* path of `fumadocs-ui` relative to the CSS file */
+@source '../node_modules/fumadocs-ui/dist/**/*.js';
+
+:root {
+  --fd-layout-width: 1600px;
+}
+
+@theme {
+  --color-primary: var(--color-fd-primary);
+  --color-primary-foreground: var(--color-fd-primary-foreground);
+  --color-secondary: var(--color-fd-secondary);
+  --color-secondary-foreground: var(--color-fd-secondary-foreground);
+  --color-accent: var(--color-fd-accent);
+  --color-accent-foreground: var(--color-fd-accent-foreground);
+  --color-background: var(--color-fd-background);
+  --color-foreground: var(--color-fd-foreground);
+  --color-muted: var(--color-fd-muted);
+  --color-muted-foreground: var(--color-fd-muted-foreground);
+  --color-border: var(--color-fd-border);
+  --color-card: var(--color-fd-card);
+  --color-card-foreground: var(--color-fd-card-foreground);
+}
+
+/* Terminal styling */
+.typing-animation {
+  position: relative;
+}
+
+.typing-animation::after {
+  content: '_';
+  position: absolute;
+  margin-left: 5px;
+  animation: cursor 1s infinite;
+}
+
+@keyframes cursor {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+pre {
+  padding-left: 1rem;
+  line-height: 1.5;
+}
+
+.terminal-window {
+  background: rgba(0, 0, 0, 0.9);
+  box-shadow: 0 0 30px rgba(0, 255, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
