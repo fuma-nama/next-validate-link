@@ -61,3 +61,34 @@ test('scan router from file system: Astro', async () => {
     }
   `);
 });
+
+test('scan router from file system: Nuxt', async () => {
+  const urls = await scanURLs({
+    preset: 'nuxt',
+    cwd: path.join(fileURLToPath(import.meta.url), '../fixture/nuxt-1'),
+    populate: {
+      'docs/[...slug]': [
+        {
+          value: 'test',
+        },
+      ],
+    },
+  });
+
+  expect(urls).toMatchInlineSnapshot(`
+    {
+      "fallbackUrls": [
+        {
+          "meta": {},
+          "url": /\\^\\\\/blog\\\\/\\(\\.\\+\\)\\$/,
+        },
+      ],
+      "urls": Map {
+        "/" => {},
+        "/docs/test" => {
+          "value": "test",
+        },
+      },
+    }
+  `);
+});

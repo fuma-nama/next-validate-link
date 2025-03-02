@@ -1,5 +1,6 @@
 import * as Next from './presets/next';
 import * as Astro from './presets/astro';
+import * as Nuxt from './presets/nuxt';
 
 export type PopulateParams = Record<
   string,
@@ -45,8 +46,10 @@ export async function scanURLs({
   /**
    * @default next
    */
-  preset?: 'next' | 'astro';
+  preset?: 'next' | 'astro' | 'nuxt';
 } = {}): Promise<ScanResult> {
   if (preset === 'astro') return Astro.scanURLs(options);
+  if (preset === 'nuxt') return Nuxt.scanURLs(options);
+
   return Next.scanURLs(options);
 }
