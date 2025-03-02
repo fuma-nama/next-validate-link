@@ -1,8 +1,8 @@
-import {
-  type PopulateParams,
+import type {
+  PopulateParams,
   ScanOptions,
   ScanResult,
-  type UrlMeta,
+  UrlMeta,
 } from '@/scan';
 
 const defaultPopulate: PopulateParams[string] = [{}];
@@ -63,7 +63,7 @@ export function populate(
   let params: PopulateParams[string] | undefined;
   if (options.populate) {
     params = options.populate['/'];
-    let searchPath = [...segments];
+    const searchPath = [...segments];
 
     while (!params && searchPath.length > 0) {
       params = options.populate[searchPath.join('/')];
