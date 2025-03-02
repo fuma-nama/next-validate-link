@@ -1,0 +1,18 @@
+---
+title: Astro
+description: Support Astro validation
+---
+
+## Usage
+
+By default, it assumes you are using Next.js routing.
+You can pass a framework preset to customise how it scans your pages.
+
+```ts
+import { scanURLs } from 'next-validate-link';
+
+const scanned = await scanURLs({
+  preset: 'astro',
+});
+// validate with the scanned urls
+```

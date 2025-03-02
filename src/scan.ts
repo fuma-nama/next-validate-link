@@ -1,6 +1,6 @@
-import fg from 'fast-glob';
-import * as path from 'node:path';
-import { stat } from 'node:fs/promises';
+import * as Next from './presets/next';
+import * as Astro from './presets/astro';
+import * as Nuxt from './presets/nuxt';
 
 export type PopulateParams = Record<
   string,
@@ -34,181 +34,22 @@ export type ScanResult = {
   }[];
 };
 
-type UrlMeta = {
+export type UrlMeta = {
   hashes?: string[];
   queries?: Record<string, string>[];
 };
 
-const defaultMeta = {};
-const defaultPopulate: PopulateParams[string] = [{}];
+export async function scanURLs({
+  preset,
+  ...options
+}: ScanOptions & {
+  /**
+   * @default next
+   */
+  preset?: 'next' | 'astro' | 'nuxt';
+} = {}): Promise<ScanResult> {
+  if (preset === 'astro') return Astro.scanURLs(options);
+  if (preset === 'nuxt') return Nuxt.scanURLs(options);
 
-function isDirExists(dir: string): Promise<boolean> {
-  return stat(dir)
-    .then((res) => res.isDirectory())
-    .catch(() => false);
-}
-
-export async function scanURLs(options: ScanOptions = {}): Promise<ScanResult> {
-  const ext = options.extensions ?? ['js', 'jsx', 'tsx', 'md', 'mdx'];
-  const cwd = options.cwd ?? process.cwd();
-
-  async function getFiles() {
-    const suffix = ext.length > 0 ? `.{${ext.join(',')}}` : '';
-
-    const appFiles = await fg(`**/page${suffix}`, {
-      cwd: (await isDirExists(path.join(cwd, 'src/app')))
-        ? path.join(cwd, 'src/app')
-        : path.join(cwd, 'app'),
-    });
-
-    const pagesFiles = await fg(`**/*${suffix}`, {
-      cwd: (await isDirExists(path.join(cwd, 'src/pages')))
-        ? path.join(cwd, 'src/pages')
-        : path.join(cwd, 'pages'),
-    });
-
-    return [
-      ...appFiles,
-      ...pagesFiles.map((file) => {
-        const parsed = path.parse(file);
-        if (parsed.name === 'index') return path.join(parsed.dir, 'page.tsx');
-
-        return path.join(parsed.dir, parsed.name, 'page.tsx');
-      }),
-    ];
-  }
-
-  const result: ScanResult = { urls: new Map(), fallbackUrls: [] };
-  const files = options.pages ?? (await getFiles());
-
-  files.forEach((file) => {
-    const segments = file.split(path.sep);
-    const out = populate(segments, options);
-
-    out.forEach((entry) => {
-      if (typeof entry.url === 'string') {
-        result.urls.set(entry.url, entry.meta ?? defaultMeta);
-      } else {
-        result.fallbackUrls.push({
-          url: entry.url,
-          meta: entry.meta ?? defaultMeta,
-        });
-      }
-    });
-  });
-
-  return result;
-}
-
-const OPTIONAL_CATCH_ALL = /^\[\[\.\.\.(.+)\]\]$/;
-const CALCH_ALL = /^\[\.\.\.(.+)\]$/;
-
-function populate(
-  segments: string[],
-  options: ScanOptions,
-): { url: string | RegExp; meta?: UrlMeta }[] {
-  const current: string[] = [];
-  const paramIndexes = new Map<number, 'required' | 'optional'>();
-
-  for (let i = 0; i < segments.length - 1; i++) {
-    const segment = segments[i];
-
-    // route groups
-    if (segment.startsWith('(') && segment.endsWith(')')) continue;
-    if (segment.startsWith('[') && segment.endsWith(']')) {
-      let match = OPTIONAL_CATCH_ALL.exec(segment);
-
-      if (match) {
-        paramIndexes.set(i, 'optional');
-        current.push(match[1]);
-        continue;
-      }
-
-      match = CALCH_ALL.exec(segment);
-      if (match) {
-        paramIndexes.set(i, 'required');
-        current.push(match[1]);
-        continue;
-      }
-
-      paramIndexes.set(i, 'required');
-      current.push(segment.slice(1, -1));
-      continue;
-    }
-
-    current.push(segment);
-  }
-  // static
-  if (paramIndexes.size === 0) {
-    return [
-      {
-        url: `/${current.join('/')}`,
-        meta: options.meta?.[segments.join('/')],
-      },
-    ];
-  }
-
-  const out: { url: string | RegExp; meta?: UrlMeta }[] = [];
-
-  const searchPath = segments;
-  let populate: PopulateParams[string] | undefined;
-  while (!populate && searchPath.length > 0) {
-    populate = options.populate?.[searchPath.join('/')];
-    searchPath.pop();
-  }
-
-  for (const param of populate ?? defaultPopulate) {
-    let clone = [...current];
-
-    if (
-      paramIndexes.size > 1 &&
-      (Array.isArray(param.value) || typeof param.value === 'string')
-    ) {
-      console.warn(
-        `path ${searchPath.join('/')} requires multiple params, an object value for populate is expected.`,
-      );
-    }
-
-    let isFallback = false;
-    for (const [index, type] of paramIndexes.entries()) {
-      const name = current[index];
-      let value: string | string[] | undefined;
-
-      if (Array.isArray(param.value) || typeof param.value === 'string') {
-        value = param.value;
-      } else if (param.value && name in param.value) {
-        value = param.value[name];
-      }
-
-      if (value) {
-        clone[index] = typeof value === 'string' ? value : value.join('/');
-        continue;
-      }
-
-      if (type === 'optional') {
-        if (index !== current.length - 1)
-          throw new Error('Invalid position of optional catch-all');
-
-        // without param (optional case)
-        out.push({
-          url: `/${clone.slice(0, -1).join('/')}`,
-          meta: param,
-        });
-      }
-
-      clone[index] = '(.+)';
-      isFallback = true;
-    }
-
-    clone = clone.filter(Boolean);
-
-    out.push({
-      url: isFallback
-        ? new RegExp(`^\\/${clone.join('\\/')}$`)
-        : `/${clone.join('/')}`,
-      meta: param,
-    });
-  }
-
-  return out;
+  return Next.scanURLs(options);
 }
