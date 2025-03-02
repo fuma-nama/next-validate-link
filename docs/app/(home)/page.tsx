@@ -9,7 +9,7 @@ const version = packageJson.version;
 
 export default function Page() {
   return (
-    <main className="flex-1 font-mono py-8 px-2 md:px-4">
+    <main className="flex-1 font-mono py-8 md:px-4">
       <div className="container mx-auto max-w-4xl">
         <div className="border rounded-lg p-6 mb-8">
           <div className="flex items-center mb-4 border-b pb-2">

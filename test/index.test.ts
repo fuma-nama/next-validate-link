@@ -83,7 +83,7 @@ test('scan pages with params', async () => {
       ],
     },
     meta: {
-      '/': {
+      'page.tsx': {
         hashes: ['test'],
       },
     },

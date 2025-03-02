@@ -55,7 +55,7 @@ import { scanURLs } from 'next-validate-link';
 
 const scanned = await scanURLs({
   meta: {
-    'page.tsx': {
+    '/': {
       // allowed fragment strings
       hashes: ['fragment'],
       // allowed queries
@@ -174,16 +174,14 @@ You can use it in conjunction with `validateFiles`.
 ### `pages`
 
 By default, it looks for the pages from your file system.
-You can override the obtained pages by passing an array of file paths.
+You can override the obtained pages by passing an array of urls.
 
 This also allows you to parse available pages from non-Next.js routing.
-
-Note that `pages` only supports App Router format input, pages must have `page.tsx` as file name.
 
 ```ts
 import { scanURLs } from 'next-validate-link';
 
 const scanned = await scanURLs({
-  pages: ['page.tsx', '(home)/overview/page.tsx', 'docs/[[...slug]]/page.tsx'],
+  pages: ['/', '(home)/overview', 'docs/[[...slug]]'],
 });
 ```

@@ -40,6 +40,16 @@ export async function scanURLs(options: ScanOptions = {}): Promise<ScanResult> {
     ];
   }
 
+  // compatibility
+  if (options.meta)
+    for (const key of Object.keys(options.meta)) {
+      if (!key.endsWith('page.tsx')) continue;
+      let newKey = path.dirname(key);
+      if (newKey === '.') newKey = '/';
+      options.meta[newKey] = options.meta[key];
+      delete options.meta[key];
+    }
+
   const result: ScanResult = { urls: new Map(), fallbackUrls: [] };
   const files = await getFiles();
 
