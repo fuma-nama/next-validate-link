@@ -22,7 +22,7 @@ test('scan pages with meta', async () => {
   const scanned = await scanURLs({
     pages: ['page.tsx', 'docs/page.tsx', 'nested/docs/page.tsx'],
     meta: {
-      'page.tsx': {
+      '/': {
         hashes: ['test'],
       },
     },
@@ -83,7 +83,7 @@ test('scan pages with params', async () => {
       ],
     },
     meta: {
-      'page.tsx': {
+      '/': {
         hashes: ['test'],
       },
     },
