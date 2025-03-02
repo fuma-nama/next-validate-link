@@ -1,5 +1,12 @@
 # next-validate-link
 
+## 1.5.0
+
+### Minor Changes
+
+- a793a99: Support Nuxt framework preset
+- 19ce49f: Support Astro preset in `scanURLs`
+
 ## 1.4.2
 
 ### Patch Changes
