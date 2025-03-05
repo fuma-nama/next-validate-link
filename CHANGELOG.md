@@ -1,5 +1,11 @@
 # next-validate-link
 
+## 1.5.1
+
+### Patch Changes
+
+- 6b5adcc: Improve Next.js route group support
+
 ## 1.5.0
 
 ### Minor Changes
