@@ -1,6 +1,6 @@
 {
   "name": "next-validate-link",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "An utility to validate links in markdown file",
   "keywords": [
     "NextJs",
