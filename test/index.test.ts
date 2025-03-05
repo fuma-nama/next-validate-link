@@ -137,10 +137,10 @@ test('scan pages with params', async () => {
 test('scan pages with dynamic params', async () => {
   const scanned = await scanURLs({
     pages: [
-      'page.tsx',
       'docs/page.tsx',
       'docs/[...slug]/page.tsx',
       'blog/[[...slug]]/page.tsx',
+      '(test)/[[...slug]]/page.tsx',
     ],
   });
 
@@ -155,11 +155,15 @@ test('scan pages with dynamic params', async () => {
           "meta": {},
           "url": /\\^\\\\/blog\\\\/\\(\\.\\+\\)\\$/,
         },
+        {
+          "meta": {},
+          "url": /\\^\\\\/\\(\\.\\+\\)\\$/,
+        },
       ],
       "urls": Map {
-        "/" => {},
         "/docs" => {},
         "/blog" => {},
+        "/" => {},
       },
     }
   `);
