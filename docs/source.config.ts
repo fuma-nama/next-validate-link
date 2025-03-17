@@ -12,6 +12,7 @@ export default defineConfig({
       [remarkDocGen, { generators: [fileGenerator()] }],
     ],
     rehypeCodeOptions: {
+      inline: 'tailing-curly-colon',
       themes: {
         light: 'catppuccin-latte',
         dark: 'catppuccin-mocha',

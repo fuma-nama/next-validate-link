@@ -6,6 +6,7 @@ import { checkExternalUrl } from './check-external-url';
 import remarkGfm from 'remark-gfm';
 import { type PathToUrl, readFileFromPath } from './sample';
 import { resolveUrl } from './utils/url';
+import { access, constants } from 'node:fs/promises';
 
 const processor = remark().use(remarkGfm);
 
@@ -23,6 +24,16 @@ export type DetectedError = [
 ];
 
 export type ValidateConfig = {
+  /**
+   * Base URL to resolve relative URLs
+   */
+  baseUrl?: string;
+
+  /**
+   * Base directory to resolve relative file paths
+   */
+  baseDir?: string;
+
   /**
    * Available URLs (including hashes and query parameters)
    */
@@ -50,9 +61,9 @@ export type ValidateConfig = {
   checkExternal?: boolean;
 
   /**
-   * Generate url for markdown files.
+   * Generate url for file paths.
    *
-   * Required for relative url detection.
+   * Required for relative url/file path detection.
    */
   pathToUrl?: PathToUrl;
 
@@ -62,7 +73,19 @@ export type ValidateConfig = {
    * - a function that returns `true` for allowed href
    */
   whitelist?: string[] | ((url: string) => boolean);
+
+  /**
+   * Determinate the type of pathname
+   */
+  determinatePathname?: (
+    pathname: string,
+    config: ValidateConfig,
+  ) => Awaitable<PathnameType>;
 };
+
+type PathnameType = 'url' | 'relative-file-path' | 'relative-url';
+
+type Awaitable<T> = T | Promise<T>;
 
 export type FileObject = {
   path: string;
@@ -104,7 +127,13 @@ export async function validateFiles(
 
     return {
       file: resolved.path,
-      detected: await validateMarkdown(resolved.content, config, resolved.url),
+      detected: await validateMarkdown(resolved.content, {
+        ...config,
+        baseUrl: resolved.url
+          ? resolved.url.split('/').slice(0, -1).join('/')
+          : config.baseUrl,
+        baseDir: path.dirname(resolved.path),
+      }),
     };
   }
 
@@ -116,7 +145,6 @@ export async function validateFiles(
 export async function validateMarkdown(
   content: string,
   config: ValidateConfig,
-  baseUrl?: string,
 ) {
   const tree = processor.parse({ value: content });
   const detected: DetectedError[] = [];
@@ -128,7 +156,7 @@ export async function validateMarkdown(
     const pos = node.position;
 
     tasks.push(
-      detect(node.url, config, baseUrl)
+      detect(node.url, config)
         .then((result) => {
           if (result) {
             detected.push([node.url, pos.start.line, pos.start.column, result]);
@@ -148,8 +176,9 @@ export async function validateMarkdown(
 export async function detect(
   href: string,
   config: ValidateConfig,
-  baseUrl?: string,
 ): Promise<ErrorReason | undefined> {
+  const determinatePathname =
+    config.determinatePathname ?? defaultDeterminatePathname;
   if (href.startsWith('mailto:')) return;
 
   if (href.match(/https?:\/\//)) {
@@ -170,14 +199,19 @@ export async function detect(
   const [pathnameWithQuery, fragment] = href.split('#', 2);
   let [pathname, query] = pathnameWithQuery.split('?', 2);
 
-  if (pathname.length === 0) return;
-  if (pathname.startsWith('.')) {
-    if (baseUrl) pathname = `/${resolveUrl(baseUrl, pathname)}`;
-    else
-      throw new Error(
-        `relative url ${pathname} cannot be resolved, you need to provide a 'url' property to file`,
-      );
+  if (pathname.length === 0 || pathname === './') return;
+  const type = await determinatePathname(pathname, config);
+
+  if (type === 'relative-url' && config.baseUrl) {
+    pathname = resolveUrl(config.baseUrl, pathname);
   }
+
+  if (type === 'relative-file-path' && config.pathToUrl) {
+    const filePath = path.join(config.baseDir ?? '', pathname);
+    pathname = config.pathToUrl(filePath);
+  }
+
+  if (!pathname.startsWith('/')) pathname = '/' + pathname;
 
   let meta = config.scanned.urls.get(pathname);
   if (!meta) {
@@ -207,4 +241,20 @@ export async function detect(
   if (!validQuery) {
     return 'invalid-query';
   }
+}
+
+async function defaultDeterminatePathname(
+  pathname: string,
+  config: ValidateConfig,
+): Promise<PathnameType> {
+  if (!pathname.startsWith('.')) return 'url';
+
+  if (
+    config.pathToUrl &&
+    (pathname.endsWith('.md') || pathname.endsWith('.mdx'))
+  ) {
+    return 'relative-file-path';
+  }
+
+  return 'relative-url';
 }

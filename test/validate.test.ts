@@ -13,10 +13,16 @@ const scanned = await scanURLs({
   populate: {
     'docs/[...slug]': [
       {
-        value: ['hello'],
+        value: ['a'],
       },
       {
-        value: ['hello', 'world'],
+        value: ['b'],
+      },
+      {
+        value: ['c'],
+      },
+      {
+        value: ['d'],
         hashes: ['hash'],
       },
     ],
@@ -25,32 +31,39 @@ const scanned = await scanURLs({
 
 test('validate links: valid', async () => {
   const pathToUrl = (file: string) => {
-    return path.dirname(file);
+    return ['docs', file.slice(0, -path.extname(file).length).split(path.sep)]
+      .filter((v) => v.length > 0)
+      .join('/');
   };
+
   expect(
     await validateFiles(
       [
         {
           path: 'a.md',
+          url: pathToUrl('a.md'),
           content: '[hello](/)',
         },
         {
           path: 'b.md',
-          content:
-            '[hello](/docs) [hello](/docs/hello) [hello](/docs/hello/world#hash)',
+          url: pathToUrl('b.md'),
+          content: '[hello](/docs) [hello](/docs/d) [hello](/docs/d#hash)',
         },
         {
           path: 'c.md',
-          content: '[hello](/dynamic) [hello](/dynamic/anything)',
+          url: pathToUrl('c.md'),
+          content:
+            '[hello](../dynamic) [hello](../dynamic/anything) [file](./b.md)',
         },
         {
           path: 'd.md',
-          url: pathToUrl('dynamic/d.md'),
-          content: '[hello](./) [hello](./anything) example@example.com',
+          url: pathToUrl('d.md'),
+          content: '[hello](./) [hello](./a) example@example.com',
         },
       ],
       {
         scanned,
+        pathToUrl,
       },
     ),
   ).toMatchInlineSnapshot(`[]`);
@@ -97,7 +110,7 @@ test('validate links: invalid fragments', async () => {
       [
         {
           path: 'a.md',
-          content: '[hello](/docs/hello/world#invalid)',
+          content: '[hello](/docs/d#invalid)',
         },
       ],
       { scanned },
@@ -107,7 +120,7 @@ test('validate links: invalid fragments', async () => {
       {
         "detected": [
           [
-            "/docs/hello/world#invalid",
+            "/docs/d#invalid",
             1,
             1,
             "invalid-fragment",
