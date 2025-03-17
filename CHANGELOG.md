@@ -1,5 +1,11 @@
 # next-validate-link
 
+## 1.5.2
+
+### Patch Changes
+
+- 6542e16: Support relative file path in Markdown files
+
 ## 1.5.1
 
 ### Patch Changes
