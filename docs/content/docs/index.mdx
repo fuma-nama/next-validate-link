@@ -16,7 +16,9 @@ Scan available URLs, it predicts them from your file-system based routing.
 ```ts
 import { scanURLs } from 'next-validate-link';
 
-const scanned = await scanURLs();
+const scanned = await scanURLs({
+  preset: 'next'
+});
 ```
 
 Validate Markdown files and print errors.
@@ -142,7 +144,8 @@ await validateFiles(await fg('content/**/*.{md,mdx}'), {
 
 ### Relative Urls
 
-To support relative urls, you need to specify a function that generates url based on file path.
+To support relative urls, specify a function that generates URL based on file path.
+This will assign a URL to each Markdown file, so that relative URLs can be resolved correctly.
 
 ```ts
 import path from 'node:path';
@@ -153,6 +156,18 @@ await validateFiles(await fg('content/**/*.{md,mdx}'), {
     return path.dirname(file);
   },
 });
+```
+
+You can also point to a Markdown file:
+
+```md
+[Test](./another-file.md)
+```
+
+It will be resolved into the generated URL of that Markdown file (same as `pathToUrl("./another-file.md"){:js}`).
+
+```md
+[Test](/docs/another-file)
 ```
 
 ## Utilities

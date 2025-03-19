@@ -1,4 +1,4 @@
-import { ScanOptions, ScanResult } from '@/scan';
+import type { ScanOptions, ScanResult } from '@/scan';
 import * as path from 'node:path';
 import fg from 'fast-glob';
 import { populateToScanResult } from './shared';
