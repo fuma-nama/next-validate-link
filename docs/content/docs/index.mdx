@@ -16,7 +16,9 @@ Scan available URLs, it predicts them from your file-system based routing.
 ```ts
 import { scanURLs } from 'next-validate-link';
 
-const scanned = await scanURLs();
+const scanned = await scanURLs({
+  preset: 'next'
+});
 ```
 
 Validate Markdown files and print errors.

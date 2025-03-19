@@ -26,26 +26,24 @@ export default function Page() {
               next-validate-link v{version}
             </h1>
             <p className="text-sm mb-4">
-              A powerful utility to validate links in your Next.js Markdown
-              files. Never worry about broken documentation links again.
+              A simple utility to validate links in your Markdown files. Never
+              worry about broken documentation links again.
             </p>
           </div>
 
           <div className="mb-8">
-            <p className="text-sm font-medium mb-2">$ ls features/</p>
-            <pre className="mb-4 whitespace-pre text-sm">
-              ├─ Automatic link checking
-              <br />
-              ├─ Identifies outdated links
-              <br />
-              ├─ Full Markdown compatibility
-              <br />
-              ├─ URL fragment validation
-              <br />
-              ├─ Dynamic route support
-              <br />
-              └─ Native support for Fumadocs
-            </pre>
+            <p className="font-bold text-sm mb-2">$ Features</p>
+            <ul className="text-sm list-decimal list-inside">
+              <li>Automatic link checking</li>
+              <li>Identifies outdated links</li>
+              <li>Full Markdown compatibility</li>
+              <li>URL fragment & query params validation</li>
+            </ul>
+          </div>
+
+          <div className="mb-8">
+            <p className="font-bold text-sm mb-2">$ Integrations</p>
+            <p className="text-sm">{`->`} Next.js, Nuxt.js, Astro, Fumadocs.</p>
           </div>
 
           <div className="mb-8">
@@ -53,9 +51,27 @@ export default function Page() {
               $ npm add next-validate-link
             </p>
             <DynamicCodeBlock
-              lang="bash"
-              code={`Installing next-validate-link...
-Package next-validate-link installed successfully!`}
+              lang="ts"
+              options={{
+                // @ts-expect-error -- custom themes
+                themes: {
+                  light: 'catppuccin-latte',
+                  dark: 'catppuccin-mocha',
+                },
+              }}
+              code={`import { scanURLs, printErrors, validateFiles } from 'next-validate-link';
+import fg from 'fast-glob';
+ 
+const scanned = await scanURLs({
+  preset: 'next'
+});
+ 
+printErrors(
+  await validateFiles(await fg('content/**/*.{md,mdx}'), {
+    scanned,
+  }),
+  true, // exit with code 1 if errors detected
+);`}
             />
           </div>
 
@@ -84,16 +100,16 @@ Package next-validate-link installed successfully!`}
         </div>
 
         <div className="border rounded-lg p-6">
-          <p className="text-sm mb-2 font-medium">$ cat how-it-works.md</p>
-          <pre className="whitespace-pre text-sm">
-            1. Scans project for Markdown files
-            <br />
-            2. Extracts all links from content
-            <br />
-            3. Validates each link
-            <br />
-            4. Generates validation report
-          </pre>
+          <p className="text-sm mb-2 font-bold">$ cat how-it-works.md</p>
+          <ul className="text-sm list-decimal list-inside">
+            <li>
+              Scans available URLs for Markdown files based on your Web
+              framework
+            </li>
+            <li>Extracts all links from content (e.g. Markdown files)</li>
+            <li>Validates each link</li>
+            <li>Generates validation report</li>
+          </ul>
         </div>
       </div>
     </main>
