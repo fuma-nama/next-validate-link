@@ -9,11 +9,7 @@ export type PathToUrl = (path: string) => string;
 export async function readFileFromPath(
   file: string,
   pathToUrl?: PathToUrl,
-): Promise<
-  FileObject & {
-    data?: object;
-  }
-> {
+): Promise<FileObject> {
   const content = await fs
     .readFile(path.resolve(file))
     .then((res) => res.toString());
@@ -23,7 +19,10 @@ export async function readFileFromPath(
   return {
     path: file,
     data: parsed.data,
-    content: parsed.content,
+    // apply offset to ensure line numbers are correct
+    content:
+      '\n'.repeat(countLine(content) - countLine(parsed.content)) +
+      parsed.content,
     url: pathToUrl ? pathToUrl(file) : undefined,
   };
 }
@@ -39,4 +38,13 @@ export async function readFiles(
   return await Promise.all(
     files.map((file) => readFileFromPath(file, options.pathToUrl)),
   );
+}
+
+function countLine(s: string) {
+  let out = 0;
+  for (const c of s) {
+    if (c === '\n') out++;
+  }
+
+  return out;
 }

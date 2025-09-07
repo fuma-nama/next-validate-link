@@ -1,29 +1,33 @@
 import picocolors from 'picocolors';
-import type { ValidateError } from '@/validate';
+import type { ValidateResult } from '@/validate';
 
 /**
  * Print validation errors
  */
-export function printErrors(errors: ValidateError[], throwError = false) {
+export function printErrors(results: ValidateResult[], throwError = false) {
   let totalErrors = 0;
   const logs: string[] = [];
 
-  for (const error of errors) {
+  for (const result of results) {
     logs.push(
-      picocolors.bold(picocolors.redBright(`Invalid URLs in ${error.file}:`)),
+      picocolors.bold(picocolors.redBright(`Invalid URLs in ${result.file}:`)),
     );
 
-    error.detected.forEach(([content, line, column, reason]) => {
+    for (const error of result.errors) {
+      const message =
+        error.reason instanceof Error ? error.reason.message : error.reason;
+
       logs.push(
-        `${picocolors.bold(content)}: ${reason instanceof Error ? reason.message : reason} at line ${line} column ${column}`,
+        `${picocolors.bold(error.url)}: ${message} at line ${error.line} column ${error.column}`,
       );
-    });
+    }
+
     logs.push(picocolors.dim('------'));
 
-    totalErrors += error.detected.length;
+    totalErrors += result.errors.length;
   }
 
-  const summary = `${errors.length} errored file, ${totalErrors} errors`;
+  const summary = `${results.length} errored file, ${totalErrors} errors`;
   logs.push(
     picocolors.bold(
       totalErrors > 0
