@@ -1,5 +1,15 @@
 # next-validate-link
 
+## 1.6.0
+
+### Minor Changes
+
+- d9d6cec: Make `validateFiles` return `ValidateResult[]` instead of `ValidateError[]`
+
+### Patch Changes
+
+- d9d6cec: Add frontmatter offset to parsed Markdown files
+
 ## 1.5.2
 
 ### Patch Changes
