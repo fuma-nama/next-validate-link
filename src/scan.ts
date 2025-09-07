@@ -11,7 +11,7 @@ export type PopulateParams = Record<
   }[]
 >;
 
-export type ScanOptions = {
+export interface ScanOptions {
   /**
    * path of pages (e.g. `/docs/page.tsx`)
    *
@@ -23,21 +23,21 @@ export type ScanOptions = {
   populate?: PopulateParams;
   meta?: Record<string, UrlMeta>;
   extensions?: string[];
-};
+}
 
-export type ScanResult = {
+export interface ScanResult {
   urls: Map<string, UrlMeta>;
 
   fallbackUrls: {
     url: RegExp;
     meta: UrlMeta;
   }[];
-};
+}
 
-export type UrlMeta = {
+export interface UrlMeta {
   hashes?: string[];
   queries?: Record<string, string>[];
-};
+}
 
 export async function scanURLs({
   preset,

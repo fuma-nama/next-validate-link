@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { scanURLs } from '@/scan';
-import { validateFiles } from '@/validate';
+import { validateFiles, type ValidateResult } from '@/validate';
 import path from 'node:path';
 
 const scanned = await scanURLs({
@@ -28,6 +28,13 @@ const scanned = await scanURLs({
     ],
   },
 });
+
+function simplify(results: ValidateResult[]) {
+  return results.map((result) => ({
+    file: result.file,
+    errors: result.errors,
+  }));
+}
 
 test('validate links: valid', async () => {
   const pathToUrl = (file: string) => {
@@ -65,7 +72,7 @@ test('validate links: valid', async () => {
         scanned,
         pathToUrl,
       },
-    ),
+    ).then(simplify),
   ).toMatchInlineSnapshot(`[]`);
 });
 
@@ -80,23 +87,23 @@ test('validate links: not found', async () => {
         },
       ],
       { scanned },
-    ),
+    ).then(simplify),
   ).toMatchInlineSnapshot(`
     [
       {
-        "detected": [
-          [
-            "/docs/invalid",
-            1,
-            1,
-            "not-found",
-          ],
-          [
-            "/doc",
-            2,
-            1,
-            "not-found",
-          ],
+        "errors": [
+          {
+            "column": 1,
+            "line": 1,
+            "reason": "not-found",
+            "url": "/docs/invalid",
+          },
+          {
+            "column": 1,
+            "line": 2,
+            "reason": "not-found",
+            "url": "/doc",
+          },
         ],
         "file": "a.md",
       },
@@ -114,17 +121,17 @@ test('validate links: invalid fragments', async () => {
         },
       ],
       { scanned },
-    ),
+    ).then(simplify),
   ).toMatchInlineSnapshot(`
     [
       {
-        "detected": [
-          [
-            "/docs/d#invalid",
-            1,
-            1,
-            "invalid-fragment",
-          ],
+        "errors": [
+          {
+            "column": 1,
+            "line": 1,
+            "reason": "invalid-fragment",
+            "url": "/docs/d#invalid",
+          },
         ],
         "file": "a.md",
       },
@@ -146,19 +153,71 @@ test('validate links: external urls', async () => {
         },
       ],
       { scanned, checkExternal: true },
-    ),
+    ).then(simplify),
   ).toMatchInlineSnapshot(`
     [
       {
-        "detected": [
-          [
-            "https://invalid.com",
-            1,
-            1,
-            "not-found",
-          ],
+        "errors": [
+          {
+            "column": 1,
+            "line": 1,
+            "reason": "not-found",
+            "url": "https://invalid.com",
+          },
         ],
         "file": "b.md",
+      },
+    ]
+  `);
+});
+
+test('validate links: line numbers', async () => {
+  expect(
+    await validateFiles(
+      [
+        {
+          path: 'a.md',
+          content: `[line 1](/unknown)
+
+[line 3](/unknown)
+
+[line 5](/invalid)
+
+some content [line 7](/test)`,
+        },
+      ],
+      { scanned },
+    ).then(simplify),
+  ).toMatchInlineSnapshot(`
+    [
+      {
+        "errors": [
+          {
+            "column": 1,
+            "line": 1,
+            "reason": "not-found",
+            "url": "/unknown",
+          },
+          {
+            "column": 1,
+            "line": 3,
+            "reason": "not-found",
+            "url": "/unknown",
+          },
+          {
+            "column": 1,
+            "line": 5,
+            "reason": "not-found",
+            "url": "/invalid",
+          },
+          {
+            "column": 14,
+            "line": 7,
+            "reason": "not-found",
+            "url": "/test",
+          },
+        ],
+        "file": "a.md",
       },
     ]
   `);

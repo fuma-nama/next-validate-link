@@ -45,10 +45,15 @@ function parseSegments(segments: string[]): {
   return { path, params };
 }
 
+interface PopulatedRoute {
+  url: string | RegExp;
+  meta?: UrlMeta;
+}
+
 export function populate(
   segments: string[],
   options: ScanOptions,
-): { url: string | RegExp; meta?: UrlMeta }[] {
+): PopulatedRoute[] {
   const parsed = parseSegments(segments);
   const countParams = parsed.params.filter((param) => param !== null).length;
 
@@ -65,7 +70,7 @@ export function populate(
     ];
   }
 
-  const out: { url: string | RegExp; meta?: UrlMeta }[] = [];
+  const out: PopulatedRoute[] = [];
 
   let params: PopulateParams[string] | undefined;
   if (options.populate) {

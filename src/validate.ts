@@ -6,22 +6,27 @@ import { checkExternalUrl } from './check-external-url';
 import remarkGfm from 'remark-gfm';
 import { type PathToUrl, readFileFromPath } from './sample';
 import { resolveUrl } from './utils/url';
-import { access, constants } from 'node:fs/promises';
 
 const processor = remark().use(remarkGfm);
 
-export type ValidateError = {
+export interface ValidateResult {
   file: string;
+
+  /**]
+   * @deprecated use `errors` instead
+   */
   detected: DetectedError[];
-};
+  errors: ValidateError[];
+}
+
+export interface ValidateError {
+  url: string;
+  line: number;
+  column: number;
+  reason: ErrorReason | Error;
+}
 
 export type ErrorReason = 'not-found' | 'invalid-fragment' | 'invalid-query';
-export type DetectedError = [
-  url: string,
-  line: number,
-  column: number,
-  reason: ErrorReason | Error,
-];
 
 export type ValidateConfig = {
   /**
@@ -87,7 +92,7 @@ type PathnameType = 'url' | 'relative-file-path' | 'relative-url';
 
 type Awaitable<T> = T | Promise<T>;
 
-export type FileObject = {
+export interface FileObject {
   path: string;
   content: string;
 
@@ -97,7 +102,7 @@ export type FileObject = {
    * URL of page, required for relative url detection
    */
   url?: string;
-};
+}
 
 /**
  * Validate markdown files
@@ -108,10 +113,10 @@ export type FileObject = {
 export async function validateFiles(
   files: (string | FileObject)[],
   config: ValidateConfig,
-): Promise<ValidateError[]> {
+): Promise<ValidateResult[]> {
   const mdExtensions = ['.md', '.mdx'];
 
-  async function run(file: string | FileObject): Promise<ValidateError> {
+  async function run(file: string | FileObject): Promise<ValidateResult> {
     const resolved =
       typeof file === 'string'
         ? await readFileFromPath(file, config.pathToUrl)
@@ -122,23 +127,28 @@ export async function validateFiles(
         `format unsupported: ${resolved.path}, supported: ${mdExtensions.join(', ')}`,
       );
 
-      return { file: resolved.path, detected: [] };
+      return { file: resolved.path, detected: [], errors: [] };
     }
+
+    const errors = await validateMarkdown(resolved.content, {
+      ...config,
+      baseUrl: resolved.url
+        ? resolved.url.split('/').slice(0, -1).join('/')
+        : config.baseUrl,
+      baseDir: path.dirname(resolved.path),
+    });
 
     return {
       file: resolved.path,
-      detected: await validateMarkdown(resolved.content, {
-        ...config,
-        baseUrl: resolved.url
-          ? resolved.url.split('/').slice(0, -1).join('/')
-          : config.baseUrl,
-        baseDir: path.dirname(resolved.path),
-      }),
+      errors,
+      get detected() {
+        return errors.map(generateLegacyError);
+      },
     };
   }
 
   return (await Promise.all(files.map(run))).filter(
-    (err) => err.detected.length > 0,
+    (err) => err.errors.length > 0,
   );
 }
 
@@ -147,7 +157,7 @@ export async function validateMarkdown(
   config: ValidateConfig,
 ) {
   const tree = processor.parse({ value: content });
-  const detected: DetectedError[] = [];
+  const errors: ValidateError[] = [];
   const tasks: Promise<void>[] = [];
 
   visit(tree, 'link', (node) => {
@@ -157,20 +167,30 @@ export async function validateMarkdown(
 
     tasks.push(
       detect(node.url, config)
-        .then((result) => {
-          if (result) {
-            detected.push([node.url, pos.start.line, pos.start.column, result]);
-          }
+        .then((err) => {
+          if (!err) return;
+
+          errors.push({
+            url: node.url,
+            line: pos.start.line,
+            column: pos.start.column,
+            reason: err,
+          });
         })
         .catch((err: Error) => {
-          detected.push([node.url, pos.start.line, pos.start.column, err]);
+          errors.push({
+            url: node.url,
+            line: pos.start.line,
+            column: pos.start.column,
+            reason: err,
+          });
         }),
     );
   });
 
   await Promise.all(tasks);
 
-  return detected;
+  return errors;
 }
 
 export async function detect(
@@ -211,7 +231,7 @@ export async function detect(
     pathname = config.pathToUrl(filePath);
   }
 
-  if (!pathname.startsWith('/')) pathname = '/' + pathname;
+  if (!pathname.startsWith('/')) pathname = `/${pathname}`;
 
   let meta = config.scanned.urls.get(pathname);
   if (!meta) {
@@ -257,4 +277,15 @@ async function defaultDeterminatePathname(
   }
 
   return 'relative-url';
+}
+
+export type DetectedError = [
+  url: string,
+  line: number,
+  column: number,
+  reason: ErrorReason | Error,
+];
+
+function generateLegacyError(v: ValidateError): DetectedError {
+  return [v.url, v.line, v.column, v.reason];
 }
