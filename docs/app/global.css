@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import 'fumadocs-ui/css/black.css';
+@import 'fumadocs-ui/css/solar.css';
 @import 'fumadocs-ui/css/preset.css';
 
 /* path of `fumadocs-ui` relative to the CSS file */
@@ -45,16 +45,4 @@
   50% {
     opacity: 0;
   }
-}
-
-pre {
-  padding-left: 1rem;
-  line-height: 1.5;
-  overflow-x: auto;
-}
-
-.terminal-window {
-  background: rgba(0, 0, 0, 0.9);
-  box-shadow: 0 0 30px rgba(0, 255, 0, 0.1);
-  backdrop-filter: blur(10px);
 }

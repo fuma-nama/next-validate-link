@@ -2,8 +2,8 @@ import { buttonVariants } from '@/components/ui/button';
 import { Github } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import packageJson from '../../../package.json';
+import { CodeBlock } from '@/components/codeblock';
 
 const version = packageJson.version;
 
@@ -50,15 +50,8 @@ export default function Page() {
             <p className="text-sm font-medium mb-2">
               $ npm add next-validate-link
             </p>
-            <DynamicCodeBlock
+            <CodeBlock
               lang="ts"
-              options={{
-                // @ts-expect-error -- custom themes
-                themes: {
-                  light: 'catppuccin-latte',
-                  dark: 'catppuccin-mocha',
-                },
-              }}
               code={`import { scanURLs, printErrors, validateFiles } from 'next-validate-link';
 import fg from 'fast-glob';
  
@@ -94,7 +87,8 @@ printErrors(
                 'border-border text-muted-foreground hover:bg-border/10',
               )}
             >
-              <Github className="mr-2 size-4" />$ git clone
+              <Github className="mr-2 size-4" />
+              github
             </a>
           </div>
         </div>

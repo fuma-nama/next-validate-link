@@ -6,7 +6,6 @@ import { checkExternalUrl } from './check-external-url';
 import remarkGfm from 'remark-gfm';
 import { type PathToUrl, readFileFromPath } from './sample';
 import { resolveUrl } from './utils/url';
-import { access, constants } from 'node:fs/promises';
 
 const processor = remark().use(remarkGfm);
 
@@ -211,7 +210,7 @@ export async function detect(
     pathname = config.pathToUrl(filePath);
   }
 
-  if (!pathname.startsWith('/')) pathname = '/' + pathname;
+  if (!pathname.startsWith('/')) pathname = `/${pathname}`;
 
   let meta = config.scanned.urls.get(pathname);
   if (!meta) {
