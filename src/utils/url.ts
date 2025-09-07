@@ -2,7 +2,7 @@
  * Split path into segments, trailing/leading slashes are removed
  */
 function splitPath(path: string): string[] {
-  return path.split('/').filter((p) => p.length > 0);
+  return path.split("/").filter((p) => p.length > 0);
 }
 
 export function resolveUrl(base: string, relative: string) {
@@ -11,10 +11,10 @@ export function resolveUrl(base: string, relative: string) {
 
   while (v2.length > 0) {
     switch (v2[0]) {
-      case '..':
+      case "..":
         v1.pop();
         break;
-      case '.':
+      case ".":
         break;
       default:
         v1.push(v2[0]);
@@ -23,5 +23,5 @@ export function resolveUrl(base: string, relative: string) {
     v2.shift();
   }
 
-  return v1.join('/');
+  return v1.join("/");
 }

@@ -1,4 +1,4 @@
-import { stat } from 'node:fs/promises';
+import { stat } from "node:fs/promises";
 
 export function isDirExists(dir: string): Promise<boolean> {
   return stat(dir)

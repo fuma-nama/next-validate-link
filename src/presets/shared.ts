@@ -1,4 +1,4 @@
-import type { PopulateParams, ScanOptions, ScanResult, UrlMeta } from '@/scan';
+import type { PopulateParams, ScanOptions, ScanResult, UrlMeta } from "@/scan";
 
 const defaultPopulate: PopulateParams[string] = [{}];
 
@@ -7,33 +7,33 @@ const CALCH_ALL = /^\[\.\.\.(.+)\]$/;
 
 function parseSegments(segments: string[]): {
   path: string[];
-  params: ('required' | 'optional' | null)[];
+  params: ("required" | "optional" | null)[];
 } {
   const path: string[] = [];
-  const params: ('required' | 'optional' | null)[] = [];
+  const params: ("required" | "optional" | null)[] = [];
 
   for (let i = 0; i < segments.length; i++) {
     const segment = segments[i];
 
     // route groups
-    if (segment.startsWith('(') && segment.endsWith(')')) continue;
+    if (segment.startsWith("(") && segment.endsWith(")")) continue;
     let match = OPTIONAL_CATCH_ALL.exec(segment);
 
     if (match) {
-      params.push('optional');
+      params.push("optional");
       path.push(match[1]);
       continue;
     }
 
     match = CALCH_ALL.exec(segment);
     if (match) {
-      params.push('required');
+      params.push("required");
       path.push(match[1]);
       continue;
     }
 
-    if (segment.startsWith('[') && segment.endsWith(']')) {
-      params.push('required');
+    if (segment.startsWith("[") && segment.endsWith("]")) {
+      params.push("required");
       path.push(segment.slice(1, -1));
       continue;
     }
@@ -60,11 +60,11 @@ export function populate(
   // static
   if (countParams === 0) {
     const meta =
-      options.meta?.[segments.length === 0 ? '/' : segments.join('/')];
+      options.meta?.[segments.length === 0 ? "/" : segments.join("/")];
 
     return [
       {
-        url: `/${parsed.path.join('/')}`,
+        url: `/${parsed.path.join("/")}`,
         meta,
       },
     ];
@@ -74,11 +74,11 @@ export function populate(
 
   let params: PopulateParams[string] | undefined;
   if (options.populate) {
-    params = options.populate['/'];
+    params = options.populate["/"];
     const searchPath = [...segments];
 
     while (!params && searchPath.length > 0) {
-      params = options.populate[searchPath.join('/')];
+      params = options.populate[searchPath.join("/")];
       searchPath.pop();
     }
   }
@@ -91,10 +91,10 @@ export function populate(
 
     if (
       countParams > 1 &&
-      (Array.isArray(param.value) || typeof param.value === 'string')
+      (Array.isArray(param.value) || typeof param.value === "string")
     ) {
       console.warn(
-        `path ${segments.join('/')} requires multiple params, an object value for populate is expected.`,
+        `path ${segments.join("/")} requires multiple params, an object value for populate is expected.`,
       );
     }
 
@@ -105,30 +105,30 @@ export function populate(
       const name = parsed.path[i];
       let value: string | string[] | undefined;
 
-      if (Array.isArray(param.value) || typeof param.value === 'string') {
+      if (Array.isArray(param.value) || typeof param.value === "string") {
         value = param.value;
       } else if (param.value && name in param.value) {
         value = param.value[name];
       }
 
       if (value) {
-        url[i] = typeof value === 'string' ? value : value.join('/');
+        url[i] = typeof value === "string" ? value : value.join("/");
         continue;
       }
 
-      if (parsed.params[i] === 'optional') {
+      if (parsed.params[i] === "optional") {
         if (i !== parsed.params.length - 1) {
-          throw new Error('Invalid position of optional catch-all');
+          throw new Error("Invalid position of optional catch-all");
         }
 
         // without param (optional case)
         out.push({
-          url: `/${url.slice(0, -1).join('/')}`,
+          url: `/${url.slice(0, -1).join("/")}`,
           meta: param,
         });
       }
 
-      url[i] = '(.+)';
+      url[i] = "(.+)";
       isFallback = true;
     }
 
@@ -136,8 +136,8 @@ export function populate(
 
     out.push({
       url: isFallback
-        ? new RegExp(`^\\/${url.join('\\/')}$`)
-        : `/${url.join('/')}`,
+        ? new RegExp(`^\\/${url.join("\\/")}$`)
+        : `/${url.join("/")}`,
       meta: param,
     });
   }
@@ -153,7 +153,7 @@ export function populateToScanResult(
   const out = populate(segments, options);
 
   for (const entry of out) {
-    if (typeof entry.url === 'string') {
+    if (typeof entry.url === "string") {
       result.urls.set(entry.url, entry.meta ?? {});
       continue;
     }

@@ -22,8 +22,5 @@ jobs:
       - name: Install Dependencies
         run: pnpm i --frozen-lockfile
 
-      - name: Lint Format
-        run: pnpm lint:prettier
-
-      - name: Run ESLint
+      - name: Run Biome Lint
         run: pnpm lint

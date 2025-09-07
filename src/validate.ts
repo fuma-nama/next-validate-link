@@ -1,11 +1,11 @@
-import { remark } from 'remark';
-import { visit } from 'unist-util-visit';
-import type { ScanResult } from '@/scan';
-import * as path from 'node:path';
-import { checkExternalUrl } from './check-external-url';
-import remarkGfm from 'remark-gfm';
-import { type PathToUrl, readFileFromPath } from './sample';
-import { resolveUrl } from './utils/url';
+import * as path from "node:path";
+import { remark } from "remark";
+import remarkGfm from "remark-gfm";
+import { visit } from "unist-util-visit";
+import type { ScanResult } from "@/scan";
+import { checkExternalUrl } from "./check-external-url";
+import { type PathToUrl, readFileFromPath } from "./sample";
+import { resolveUrl } from "./utils/url";
 
 const processor = remark().use(remarkGfm);
 
@@ -26,7 +26,7 @@ export interface ValidateError {
   reason: ErrorReason | Error;
 }
 
-export type ErrorReason = 'not-found' | 'invalid-fragment' | 'invalid-query';
+export type ErrorReason = "not-found" | "invalid-fragment" | "invalid-query";
 
 export type ValidateConfig = {
   /**
@@ -88,7 +88,7 @@ export type ValidateConfig = {
   ) => Awaitable<PathnameType>;
 };
 
-type PathnameType = 'url' | 'relative-file-path' | 'relative-url';
+type PathnameType = "url" | "relative-file-path" | "relative-url";
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -114,17 +114,17 @@ export async function validateFiles(
   files: (string | FileObject)[],
   config: ValidateConfig,
 ): Promise<ValidateResult[]> {
-  const mdExtensions = ['.md', '.mdx'];
+  const mdExtensions = [".md", ".mdx"];
 
   async function run(file: string | FileObject): Promise<ValidateResult> {
     const resolved =
-      typeof file === 'string'
+      typeof file === "string"
         ? await readFileFromPath(file, config.pathToUrl)
         : file;
 
     if (!mdExtensions.includes(path.extname(resolved.path))) {
       console.warn(
-        `format unsupported: ${resolved.path}, supported: ${mdExtensions.join(', ')}`,
+        `format unsupported: ${resolved.path}, supported: ${mdExtensions.join(", ")}`,
       );
 
       return { file: resolved.path, detected: [], errors: [] };
@@ -133,7 +133,7 @@ export async function validateFiles(
     const errors = await validateMarkdown(resolved.content, {
       ...config,
       baseUrl: resolved.url
-        ? resolved.url.split('/').slice(0, -1).join('/')
+        ? resolved.url.split("/").slice(0, -1).join("/")
         : config.baseUrl,
       baseDir: path.dirname(resolved.path),
     });
@@ -160,7 +160,7 @@ export async function validateMarkdown(
   const errors: ValidateError[] = [];
   const tasks: Promise<void>[] = [];
 
-  visit(tree, 'link', (node) => {
+  visit(tree, "link", (node) => {
     // ignore generated nodes
     if (!node.position) return;
     const pos = node.position;
@@ -199,7 +199,7 @@ export async function detect(
 ): Promise<ErrorReason | undefined> {
   const determinatePathname =
     config.determinatePathname ?? defaultDeterminatePathname;
-  if (href.startsWith('mailto:')) return;
+  if (href.startsWith("mailto:")) return;
 
   if (href.match(/https?:\/\//)) {
     if (config.checkExternal) {
@@ -212,26 +212,26 @@ export async function detect(
   if (config.whitelist) {
     if (Array.isArray(config.whitelist) && config.whitelist.includes(href))
       return;
-    if (typeof config.whitelist === 'function' && config.whitelist(href))
+    if (typeof config.whitelist === "function" && config.whitelist(href))
       return;
   }
 
-  const [pathnameWithQuery, fragment] = href.split('#', 2);
-  let [pathname, query] = pathnameWithQuery.split('?', 2);
+  const [pathnameWithQuery, fragment] = href.split("#", 2);
+  let [pathname, query] = pathnameWithQuery.split("?", 2);
 
-  if (pathname.length === 0 || pathname === './') return;
+  if (pathname.length === 0 || pathname === "./") return;
   const type = await determinatePathname(pathname, config);
 
-  if (type === 'relative-url' && config.baseUrl) {
+  if (type === "relative-url" && config.baseUrl) {
     pathname = resolveUrl(config.baseUrl, pathname);
   }
 
-  if (type === 'relative-file-path' && config.pathToUrl) {
-    const filePath = path.join(config.baseDir ?? '', pathname);
+  if (type === "relative-file-path" && config.pathToUrl) {
+    const filePath = path.join(config.baseDir ?? "", pathname);
     pathname = config.pathToUrl(filePath);
   }
 
-  if (!pathname.startsWith('/')) pathname = `/${pathname}`;
+  if (!pathname.startsWith("/")) pathname = `/${pathname}`;
 
   let meta = config.scanned.urls.get(pathname);
   if (!meta) {
@@ -240,7 +240,7 @@ export async function detect(
     })?.meta;
   }
 
-  if (!meta) return 'not-found';
+  if (!meta) return "not-found";
 
   const validFragment =
     config.ignoreFragment ||
@@ -249,7 +249,7 @@ export async function detect(
     meta.hashes.includes(fragment);
 
   if (!validFragment) {
-    return 'invalid-fragment';
+    return "invalid-fragment";
   }
 
   const validQuery =
@@ -259,7 +259,7 @@ export async function detect(
     meta.queries.some((item) => new URLSearchParams(item).toString() === query);
 
   if (!validQuery) {
-    return 'invalid-query';
+    return "invalid-query";
   }
 }
 
@@ -267,16 +267,16 @@ async function defaultDeterminatePathname(
   pathname: string,
   config: ValidateConfig,
 ): Promise<PathnameType> {
-  if (!pathname.startsWith('.')) return 'url';
+  if (!pathname.startsWith(".")) return "url";
 
   if (
     config.pathToUrl &&
-    (pathname.endsWith('.md') || pathname.endsWith('.mdx'))
+    (pathname.endsWith(".md") || pathname.endsWith(".mdx"))
   ) {
-    return 'relative-file-path';
+    return "relative-file-path";
   }
 
-  return 'relative-url';
+  return "relative-url";
 }
 
 export type DetectedError = [

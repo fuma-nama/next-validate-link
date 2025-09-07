@@ -1,8 +1,8 @@
-import { defineDocs, defineConfig } from 'fumadocs-mdx/config';
-import { fileGenerator, remarkDocGen, remarkInstall } from 'fumadocs-docgen';
+import { fileGenerator, remarkDocGen, remarkInstall } from "fumadocs-docgen";
+import { defineConfig, defineDocs } from "fumadocs-mdx/config";
 
 export const { docs, meta } = defineDocs({
-  dir: 'content/docs',
+  dir: "content/docs",
 });
 
 export default defineConfig({
@@ -12,10 +12,10 @@ export default defineConfig({
       [remarkDocGen, { generators: [fileGenerator()] }],
     ],
     rehypeCodeOptions: {
-      inline: 'tailing-curly-colon',
+      inline: "tailing-curly-colon",
       themes: {
-        light: 'catppuccin-latte',
-        dark: 'catppuccin-mocha',
+        light: "catppuccin-latte",
+        dark: "catppuccin-mocha",
       },
     },
   },

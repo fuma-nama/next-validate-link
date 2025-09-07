@@ -1,29 +1,29 @@
-import { expect, test } from 'vitest';
-import { scanURLs } from '@/scan';
-import { validateFiles, type ValidateResult } from '@/validate';
-import path from 'node:path';
+import path from "node:path";
+import { expect, test } from "vitest";
+import { scanURLs } from "@/scan";
+import { type ValidateResult, validateFiles } from "@/validate";
 
 const scanned = await scanURLs({
   pages: [
-    'page.tsx',
-    'docs/page.tsx',
-    'docs/[...slug]/page.tsx',
-    'dynamic/[[...slug]]/page.tsx',
+    "page.tsx",
+    "docs/page.tsx",
+    "docs/[...slug]/page.tsx",
+    "dynamic/[[...slug]]/page.tsx",
   ],
   populate: {
-    'docs/[...slug]': [
+    "docs/[...slug]": [
       {
-        value: ['a'],
+        value: ["a"],
       },
       {
-        value: ['b'],
+        value: ["b"],
       },
       {
-        value: ['c'],
+        value: ["c"],
       },
       {
-        value: ['d'],
-        hashes: ['hash'],
+        value: ["d"],
+        hashes: ["hash"],
       },
     ],
   },
@@ -36,36 +36,36 @@ function simplify(results: ValidateResult[]) {
   }));
 }
 
-test('validate links: valid', async () => {
+test("validate links: valid", async () => {
   const pathToUrl = (file: string) => {
-    return ['docs', file.slice(0, -path.extname(file).length).split(path.sep)]
+    return ["docs", file.slice(0, -path.extname(file).length).split(path.sep)]
       .filter((v) => v.length > 0)
-      .join('/');
+      .join("/");
   };
 
   expect(
     await validateFiles(
       [
         {
-          path: 'a.md',
-          url: pathToUrl('a.md'),
-          content: '[hello](/)',
+          path: "a.md",
+          url: pathToUrl("a.md"),
+          content: "[hello](/)",
         },
         {
-          path: 'b.md',
-          url: pathToUrl('b.md'),
-          content: '[hello](/docs) [hello](/docs/d) [hello](/docs/d#hash)',
+          path: "b.md",
+          url: pathToUrl("b.md"),
+          content: "[hello](/docs) [hello](/docs/d) [hello](/docs/d#hash)",
         },
         {
-          path: 'c.md',
-          url: pathToUrl('c.md'),
+          path: "c.md",
+          url: pathToUrl("c.md"),
           content:
-            '[hello](../dynamic) [hello](../dynamic/anything) [file](./b.md)',
+            "[hello](../dynamic) [hello](../dynamic/anything) [file](./b.md)",
         },
         {
-          path: 'd.md',
-          url: pathToUrl('d.md'),
-          content: '[hello](./) [hello](./a) example@example.com',
+          path: "d.md",
+          url: pathToUrl("d.md"),
+          content: "[hello](./) [hello](./a) example@example.com",
         },
       ],
       {
@@ -76,12 +76,12 @@ test('validate links: valid', async () => {
   ).toMatchInlineSnapshot(`[]`);
 });
 
-test('validate links: not found', async () => {
+test("validate links: not found", async () => {
   expect(
     await validateFiles(
       [
         {
-          path: 'a.md',
+          path: "a.md",
           content: `[hello](/docs/invalid)
 [hello](/doc)`,
         },
@@ -111,13 +111,13 @@ test('validate links: not found', async () => {
   `);
 });
 
-test('validate links: invalid fragments', async () => {
+test("validate links: invalid fragments", async () => {
   expect(
     await validateFiles(
       [
         {
-          path: 'a.md',
-          content: '[hello](/docs/d#invalid)',
+          path: "a.md",
+          content: "[hello](/docs/d#invalid)",
         },
       ],
       { scanned },
@@ -139,17 +139,17 @@ test('validate links: invalid fragments', async () => {
   `);
 });
 
-test('validate links: external urls', async () => {
+test("validate links: external urls", async () => {
   expect(
     await validateFiles(
       [
         {
-          path: 'a.md',
-          content: 'https://google.com http://localhost:3000',
+          path: "a.md",
+          content: "https://google.com http://localhost:3000",
         },
         {
-          path: 'b.md',
-          content: 'https://invalid.com',
+          path: "b.md",
+          content: "https://invalid.com",
         },
       ],
       { scanned, checkExternal: true },
@@ -171,12 +171,12 @@ test('validate links: external urls', async () => {
   `);
 });
 
-test('validate links: line numbers', async () => {
+test("validate links: line numbers", async () => {
   expect(
     await validateFiles(
       [
         {
-          path: 'a.md',
+          path: "a.md",
           content: `[line 1](/unknown)
 
 [line 3](/unknown)

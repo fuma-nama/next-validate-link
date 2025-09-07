@@ -1,8 +1,8 @@
-import path from 'node:path';
-import fs from 'node:fs/promises';
-import FastGlob, { type Pattern } from 'fast-glob';
-import type { FileObject } from './validate';
-import matter from 'gray-matter';
+import fs from "node:fs/promises";
+import path from "node:path";
+import FastGlob, { type Pattern } from "fast-glob";
+import matter from "gray-matter";
+import type { FileObject } from "./validate";
 
 export type PathToUrl = (path: string) => string;
 
@@ -21,7 +21,7 @@ export async function readFileFromPath(
     data: parsed.data,
     // apply offset to ensure line numbers are correct
     content:
-      '\n'.repeat(countLine(content) - countLine(parsed.content)) +
+      "\n".repeat(countLine(content) - countLine(parsed.content)) +
       parsed.content,
     url: pathToUrl ? pathToUrl(file) : undefined,
   };
@@ -43,7 +43,7 @@ export async function readFiles(
 function countLine(s: string) {
   let out = 0;
   for (const c of s) {
-    if (c === '\n') out++;
+    if (c === "\n") out++;
   }
 
   return out;

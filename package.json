@@ -23,11 +23,10 @@
     "build": "tsup",
     "clean": "rimraf dist",
     "dev": "tsup --watch",
-    "lint": "biome lint ./src ./test",
+    "lint": "biome check",
+    "format": "biome format --fix",
     "test": "vitest",
     "types:check": "tsc --noEmit",
-    "lint:prettier": "prettier --cache --check --ignore-path .gitignore --ignore-path .prettierignore .",
-    "prettier": "prettier --cache --write --list-different --ignore-path .gitignore --ignore-path .prettierignore .",
     "release": "pnpm run build && changeset publish",
     "version": "changeset version && pnpm install --lockfile-only"
   },
@@ -43,7 +42,6 @@
     "@biomejs/biome": "2.2.3",
     "@changesets/cli": "^2.29.6",
     "@types/node": "24.3.1",
-    "prettier": "^3.6.2",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
