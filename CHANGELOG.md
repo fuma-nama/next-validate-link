@@ -1,5 +1,11 @@
 # next-validate-link
 
+## 1.6.1
+
+### Patch Changes
+
+- db5a302: Support customising Markdown validator
+
 ## 1.6.0
 
 ### Minor Changes
