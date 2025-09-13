@@ -2,10 +2,11 @@ import { Detector, FileObject, ValidateError } from "@/validate";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import { visit } from "unist-util-visit";
-import { Node, RootContent } from "mdast";
+import type { Node, Root, RootContent } from "mdast";
 import remarkMdx from "remark-mdx";
+import type { PluggableList } from "unified";
 
-const processor = remark().use(remarkGfm);
+const mdProcessor = remark().use(remarkGfm);
 const mdxProcessor = remark().use(remarkMdx).use(remarkGfm);
 
 export interface MarkdownConfig {
@@ -18,6 +19,8 @@ export interface MarkdownConfig {
       attributes: string[];
     }
   >;
+
+  remarkPlugins?: PluggableList;
 
   /**
    * control how URLs are scanned from Markdown content, override all default behaviours.
@@ -35,6 +38,7 @@ export async function validateMarkdown(
   const isMdx = file.path.endsWith(".mdx");
   const {
     components = {},
+    remarkPlugins = [],
     onNode = (_node) => {
       const node = _node as RootContent;
       if (node.type === "link") {
@@ -65,10 +69,17 @@ export async function validateMarkdown(
       }
     },
   } = config;
-  const tree = (isMdx ? mdxProcessor : processor).parse({
+  const vfile = {
     path: file.path,
     value: file.content,
-  });
+  };
+
+  let tree = (isMdx ? mdxProcessor : mdProcessor)
+    .use(remarkPlugins)
+    .parse(vfile);
+  if (remarkPlugins.length > 0)
+    tree = (await remark().use(remarkPlugins).run(tree, vfile)) as Root;
+
   const errors: ValidateError[] = [];
   const tasks: Promise<void>[] = [];
 

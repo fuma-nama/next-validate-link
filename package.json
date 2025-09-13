@@ -47,6 +47,7 @@
     "mdast-util-mdx-jsx": "^3.2.0",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",
+    "unified": "^11.0.5",
     "vitest": "^3.2.4"
   },
   "publishConfig": {
