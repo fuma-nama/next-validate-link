@@ -36,12 +36,15 @@
     "picocolors": "^1.1.1",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
+    "remark-mdx": "^3.1.1",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.3",
     "@changesets/cli": "^2.29.6",
+    "@types/mdast": "^4.0.4",
     "@types/node": "24.3.1",
+    "mdast-util-mdx-jsx": "^3.2.0",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"

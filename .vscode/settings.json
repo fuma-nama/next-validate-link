@@ -1,11 +1,4 @@
 {
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
   "editor.defaultFormatter": "biomejs.biome",
-  "editor.formatOnSave": true,
-  "prettier.configPath": "prettier.config.mjs"
+  "editor.formatOnSave": true
 }
