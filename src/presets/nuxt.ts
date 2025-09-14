@@ -1,8 +1,8 @@
 import * as path from "node:path";
-import fg from "fast-glob";
 import type { ScanOptions, ScanResult } from "@/scan";
 import { isDirExists } from "@/utils/fs";
 import { populateToScanResult } from "./shared";
+import { glob } from "tinyglobby";
 
 export async function scanURLs(options: ScanOptions = {}): Promise<ScanResult> {
   const ext = options.extensions ?? ["vue", "md", "mdx"];
@@ -11,7 +11,7 @@ export async function scanURLs(options: ScanOptions = {}): Promise<ScanResult> {
   async function getFiles() {
     const suffix = ext.length > 0 ? `.{${ext.join(",")}}` : "";
 
-    const pagesFiles = await fg(`**/*${suffix}`, {
+    const pagesFiles = await glob(`**/*${suffix}`, {
       cwd: (await isDirExists(path.join(cwd, "src/pages")))
         ? path.join(cwd, "src/pages")
         : path.join(cwd, "pages"),

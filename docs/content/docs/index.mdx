@@ -8,7 +8,7 @@ description: A tool for validating links in Markdown files
 Install it.
 
 ```package-install
-npm i next-validate-link fast-glob
+npm i next-validate-link
 ```
 
 Scan available URLs, it predicts them from your file-system based routing.
@@ -24,11 +24,10 @@ const scanned = await scanURLs({
 Validate Markdown files and print errors.
 
 ```ts
-import fg from 'fast-glob';
-import { printErrors, validateFiles } from 'next-validate-link';
+import { printErrors, validateFiles, readFiles } from 'next-validate-link';
 
 printErrors(
-  await validateFiles(await fg('content/**/*.{md,mdx}'), {
+  await validateFiles(await readFiles('content/**/*.{md,mdx}'), {
     scanned,
   }),
   // exit with code 1 if errors detected
@@ -133,10 +132,9 @@ const scanned = await scanURLs({
 To validate external urls, enable it.
 
 ```ts
-import fg from 'fast-glob';
-import { validateFiles } from 'next-validate-link';
+import { validateFiles, readFiles } from 'next-validate-link';
 
-await validateFiles(await fg('content/**/*.{md,mdx}'), {
+await validateFiles(await readFiles('content/**/*.{md,mdx}'), {
   scanned,
   checkExternal: true,
 });

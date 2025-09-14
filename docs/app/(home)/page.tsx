@@ -52,15 +52,14 @@ export default function Page() {
             </p>
             <CodeBlock
               lang="ts"
-              code={`import { scanURLs, printErrors, validateFiles } from 'next-validate-link';
-import fg from 'fast-glob';
+              code={`import { scanURLs, printErrors, readFiles, validateFiles } from 'next-validate-link';
  
 const scanned = await scanURLs({
   preset: 'next'
 });
  
 printErrors(
-  await validateFiles(await fg('content/**/*.{md,mdx}'), {
+  await validateFiles(await readFiles('content/**/*.{md,mdx}'), {
     scanned,
   }),
   true, // exit with code 1 if errors detected
@@ -73,7 +72,7 @@ printErrors(
               href="/docs"
               className={cn(
                 buttonVariants({ variant: "outline" }),
-                "border-border text-muted-foreground hover:bg-border/10",
+                "border-border text-muted-foreground hover:bg-border/10"
               )}
             >
               $ cd /docs
@@ -84,7 +83,7 @@ printErrors(
               rel="noreferrer noopener"
               className={cn(
                 buttonVariants({ variant: "outline" }),
-                "border-border text-muted-foreground hover:bg-border/10",
+                "border-border text-muted-foreground hover:bg-border/10"
               )}
             >
               <Github className="mr-2 size-4" />

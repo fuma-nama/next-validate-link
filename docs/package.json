@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
-    "fast-glob": "^3.3.1",
     "fumadocs-core": "15.7.11",
     "fumadocs-docgen": "3.0.0",
     "fumadocs-mdx": "11.9.1",
@@ -22,7 +21,8 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "shiki": "^3.12.2",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "tinyglobby": "^0.2.15"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.13",

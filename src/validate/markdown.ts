@@ -1,13 +1,15 @@
-import { Detector, FileObject, ValidateError } from "@/validate";
+import {
+  Detector,
+  FileObject,
+  ResolutionConfig,
+  ValidateError,
+} from "@/validate";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import { visit } from "unist-util-visit";
 import type { Node, Root, RootContent } from "mdast";
 import remarkMdx from "remark-mdx";
 import type { PluggableList } from "unified";
-
-const mdProcessor = remark().use(remarkGfm);
-const mdxProcessor = remark().use(remarkMdx).use(remarkGfm);
 
 export interface MarkdownConfig {
   /**
@@ -30,12 +32,10 @@ export interface MarkdownConfig {
   };
 }
 
-export async function validateMarkdown(
-  file: FileObject,
-  detector: Detector,
-  config: MarkdownConfig
+export function createMarkdownValidator(
+  config: MarkdownConfig,
+  detector: Detector
 ) {
-  const isMdx = file.path.endsWith(".mdx");
   const {
     components = {},
     remarkPlugins = [],
@@ -69,54 +69,64 @@ export async function validateMarkdown(
       }
     },
   } = config;
-  const vfile = {
-    path: file.path,
-    value: file.content,
+
+  const mdProcessor = remark().use(remarkGfm).use(remarkPlugins);
+  const mdxProcessor = remark()
+    .use(remarkMdx)
+    .use(remarkGfm)
+    .use(remarkPlugins);
+
+  return {
+    async validate(
+      file: FileObject,
+      resolution: ResolutionConfig
+    ): Promise<ValidateError[]> {
+      const errors: ValidateError[] = [];
+      const tasks: Promise<void>[] = [];
+      const processor = file.path.endsWith(".mdx") ? mdxProcessor : mdProcessor;
+      const vfile = {
+        path: file.path,
+        value: file.content,
+      };
+
+      let tree = processor.parse(vfile);
+      tree = (await processor.run(tree, vfile)) as Root;
+
+      visit(tree, (node) => {
+        // ignore generated nodes
+        if (!node.position) return;
+        const pos = node.position;
+        const scanned = onNode(node);
+        if (!scanned) return;
+
+        for (const href of scanned.hrefs) {
+          tasks.push(
+            detector
+              .detect(href, resolution)
+              .then((err) => {
+                if (!err || err.type !== "error") return;
+
+                errors.push({
+                  url: href,
+                  line: pos.start.line,
+                  column: pos.start.column,
+                  reason: err.reason,
+                });
+              })
+              .catch((err: Error) => {
+                errors.push({
+                  url: href,
+                  line: pos.start.line,
+                  column: pos.start.column,
+                  reason: err,
+                });
+              })
+          );
+        }
+      });
+
+      await Promise.all(tasks);
+      return errors;
+    },
   };
-
-  let tree = (isMdx ? mdxProcessor : mdProcessor)
-    .use(remarkPlugins)
-    .parse(vfile);
-  if (remarkPlugins.length > 0)
-    tree = (await remark().use(remarkPlugins).run(tree, vfile)) as Root;
-
-  const errors: ValidateError[] = [];
-  const tasks: Promise<void>[] = [];
-
-  visit(tree, (node) => {
-    // ignore generated nodes
-    if (!node.position) return;
-    const pos = node.position;
-    const scanned = onNode(node);
-    if (!scanned) return;
-
-    for (const href of scanned.hrefs) {
-      tasks.push(
-        detector
-          .detect(href)
-          .then((err) => {
-            if (!err || err.type !== "error") return;
-
-            errors.push({
-              url: href,
-              line: pos.start.line,
-              column: pos.start.column,
-              reason: err.reason,
-            });
-          })
-          .catch((err: Error) => {
-            errors.push({
-              url: href,
-              line: pos.start.line,
-              column: pos.start.column,
-              reason: err,
-            });
-          })
-      );
-    }
-  });
-
-  await Promise.all(tasks);
-
-  return errors;
 }

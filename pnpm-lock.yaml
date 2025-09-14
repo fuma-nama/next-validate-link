@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
@@ -26,6 +23,9 @@ importers:
       remark-mdx:
         specifier: ^3.1.1
         version: 3.1.1
+      tinyglobby:
+        specifier: ^0.2.15
+        version: 0.2.15
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
@@ -63,9 +63,6 @@ importers:
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
-      fast-glob:
-        specifier: ^3.3.1
-        version: 3.3.3
       fumadocs-core:
         specifier: 15.7.11
         version: 15.7.11(@types/react@19.1.13)(next@15.5.3(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -99,6 +96,9 @@ importers:
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.3.1
+      tinyglobby:
+        specifier: ^0.2.15
+        version: 0.2.15
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.1.13
