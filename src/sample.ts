@@ -7,7 +7,7 @@ export type PathToUrl = (path: string) => string | undefined;
 
 export async function readFileFromPath(
   file: string,
-  pathToUrl?: PathToUrl
+  pathToUrl?: PathToUrl,
 ): Promise<FileObject> {
   const content = await fs.readFile(file).then((res) => res.toString());
 
@@ -28,12 +28,12 @@ export async function readFiles(
   patterns: string | readonly string[],
   options: Partial<{
     pathToUrl?: PathToUrl;
-  }> = {}
+  }> = {},
 ): Promise<FileObject[]> {
   const files = await glob(patterns);
 
   return await Promise.all(
-    files.map((file) => readFileFromPath(file, options.pathToUrl))
+    files.map((file) => readFileFromPath(file, options.pathToUrl)),
   );
 }
 

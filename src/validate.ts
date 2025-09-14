@@ -140,20 +140,20 @@ const supportedExtensions = mdExtensions;
  */
 export async function validateFiles(
   files: (string | FileObject)[],
-  config: ValidateConfig
+  config: ValidateConfig,
 ): Promise<ValidateResult[]> {
   const detector = createDetector(config);
   const markdownValidator = createMarkdownValidator(
     config.markdown ?? {},
-    detector
+    detector,
   );
 
   const normalized = await Promise.all(
     files.map(async (file) =>
       typeof file === "string"
         ? await readFileFromPath(file, config.pathToUrl)
-        : file
-    )
+        : file,
+    ),
   );
   const defaultPathToUrl: PathToUrl = (path) => {
     for (const file of normalized) {
@@ -177,8 +177,8 @@ export async function validateFiles(
     } else {
       console.warn(
         `format unsupported: ${ext}, supported: ${supportedExtensions.join(
-          ", "
-        )}`
+          ", ",
+        )}`,
       );
     }
 
@@ -192,14 +192,14 @@ export async function validateFiles(
   }
 
   return (await Promise.all(normalized.map(run))).filter(
-    (err) => err.errors.length > 0
+    (err) => err.errors.length > 0,
   );
 }
 
 export interface Detector {
   detect: (
     href: string,
-    resolution: ResolutionConfig
+    resolution: ResolutionConfig,
   ) => Promise<{ type: "error"; reason: ErrorReason } | undefined>;
 }
 
@@ -256,7 +256,7 @@ function createDetector(config: DetectorConfig): Detector {
         if (!checkRelativeUrls) return;
         if (!baseUrl)
           throw new Error(
-            `relative URL ${pathname} detected, but 'baseUrl' option is missing.`
+            `relative URL ${pathname} detected, but 'baseUrl' option is missing.`,
           );
 
         pathname = resolveUrl(baseUrl, pathname);
@@ -276,7 +276,7 @@ function createDetector(config: DetectorConfig): Detector {
         if (checkRelativePaths === "as-url") {
           if (!pathToUrl)
             throw new Error(
-              `'checkRelativePaths: as-url' is set, but 'pathToUrl' option is missing.`
+              `'checkRelativePaths: as-url' is set, but 'pathToUrl' option is missing.`,
             );
 
           const asUrl = pathToUrl(filePath);
@@ -313,7 +313,7 @@ function createDetector(config: DetectorConfig): Detector {
         !ignoreQuery &&
         meta.queries &&
         !meta.queries.some(
-          (item) => new URLSearchParams(item).toString() === query
+          (item) => new URLSearchParams(item).toString() === query,
         )
       ) {
         return { type: "error", reason: "invalid-query" };
@@ -326,7 +326,7 @@ export type DetectedError = [
   url: string,
   line: number,
   column: number,
-  reason: ErrorReason | Error
+  reason: ErrorReason | Error,
 ];
 
 function generateLegacyError(v: ValidateError): DetectedError {

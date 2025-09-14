@@ -1,6 +1,8 @@
 import * as Astro from "./presets/astro";
 import * as Next from "./presets/next";
 import * as Nuxt from "./presets/nuxt";
+import * as ReactRouter from "./presets/react-router";
+import * as Waku from "./presets/waku";
 
 export type PopulateParams = Record<
   string,
@@ -25,6 +27,15 @@ export interface ScanOptions {
   extensions?: string[];
 }
 
+export type ScanPresetOptions =
+  | (ScanOptions & {
+      /**
+       * @default next
+       */
+      preset?: "next" | "astro" | "nuxt" | "waku";
+    })
+  | ReactRouter.ReactRouterScanOptions;
+
 export interface ScanResult {
   urls: Map<string, UrlMeta>;
 
@@ -39,17 +50,19 @@ export interface UrlMeta {
   queries?: Record<string, string>[];
 }
 
-export async function scanURLs({
-  preset,
-  ...options
-}: ScanOptions & {
-  /**
-   * @default next
-   */
-  preset?: "next" | "astro" | "nuxt";
-} = {}): Promise<ScanResult> {
-  if (preset === "astro") return Astro.scanURLs(options);
-  if (preset === "nuxt") return Nuxt.scanURLs(options);
-
-  return Next.scanURLs(options);
+export async function scanURLs(
+  options: ScanPresetOptions = {},
+): Promise<ScanResult> {
+  switch (options.preset) {
+    case "astro":
+      return Astro.scanURLs(options);
+    case "nuxt":
+      return Nuxt.scanURLs(options);
+    case "react-router":
+      return ReactRouter.scanURLs(options);
+    case "waku":
+      return Waku.scanURLs(options);
+    default:
+      return Next.scanURLs(options);
+  }
 }

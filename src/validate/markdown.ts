@@ -34,7 +34,7 @@ export interface MarkdownConfig {
 
 export function createMarkdownValidator(
   config: MarkdownConfig,
-  detector: Detector
+  detector: Detector,
 ) {
   const {
     components = {},
@@ -79,7 +79,7 @@ export function createMarkdownValidator(
   return {
     async validate(
       file: FileObject,
-      resolution: ResolutionConfig
+      resolution: ResolutionConfig,
     ): Promise<ValidateError[]> {
       const errors: ValidateError[] = [];
       const tasks: Promise<void>[] = [];
@@ -120,7 +120,7 @@ export function createMarkdownValidator(
                   column: pos.start.column,
                   reason: err,
                 });
-              })
+              }),
           );
         }
       });

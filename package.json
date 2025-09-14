@@ -42,6 +42,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
     "@changesets/cli": "^2.29.7",
+    "@react-router/dev": "^7.9.1",
     "@types/mdast": "^4.0.4",
     "@types/node": "24.3.3",
     "mdast-util-mdx-jsx": "^3.2.0",

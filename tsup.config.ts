@@ -5,4 +5,5 @@ export default defineConfig({
   target: "node18",
   entry: ["./src/index.ts"],
   format: "esm",
+  external: ["@react-router/dev"],
 });

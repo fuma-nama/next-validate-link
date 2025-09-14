@@ -62,6 +62,72 @@ test("scan router from file system: Astro", async () => {
   `);
 });
 
+test("scan router from file system: Waku", async () => {
+  const urls = await scanURLs({
+    preset: "waku",
+    cwd: path.join(fileURLToPath(import.meta.url), "../fixture/waku-1"),
+  });
+
+  expect(urls).toMatchInlineSnapshot(`
+    {
+      "fallbackUrls": [
+        {
+          "meta": {},
+          "url": /\\^\\\\/\\(\\.\\+\\)\\\\/\\(\\.\\+\\)\\$/,
+        },
+        {
+          "meta": {},
+          "url": /\\^\\\\/\\(\\.\\+\\)\\$/,
+        },
+        {
+          "meta": {},
+          "url": /\\^\\\\/\\(\\.\\+\\)\\\\/settings\\$/,
+        },
+        {
+          "meta": {},
+          "url": /\\^\\\\/docs\\\\/\\(\\.\\+\\)\\$/,
+        },
+      ],
+      "urls": Map {
+        "/" => {},
+        "/page" => {},
+        "/docs" => {},
+      },
+    }
+  `);
+});
+
+test("scan router from file system: React Router", async () => {
+  const urls = await scanURLs({
+    preset: "react-router",
+    routerConfig: (await import("./fixture/react-router-1/route")).default,
+  });
+
+  expect(urls).toMatchInlineSnapshot(`
+    {
+      "fallbackUrls": [
+        {
+          "meta": {},
+          "url": /\\^\\\\/projects\\\\/\\(\\.\\+\\)\\$/,
+        },
+        {
+          "meta": {},
+          "url": /\\^\\\\/projects\\\\/\\(\\.\\+\\)\\\\/edit\\$/,
+        },
+        {
+          "meta": {},
+          "url": /\\^\\\\/projects\\\\/\\(\\.\\+\\)\\\\/seek\\$/,
+        },
+      ],
+      "urls": Map {
+        "/contact" => {},
+        "/projects" => {},
+        "/projects/seek" => {},
+      },
+    }
+  `);
+});
+
 test("scan router from file system: Nuxt", async () => {
   const urls = await scanURLs({
     preset: "nuxt",
