@@ -158,3 +158,38 @@ test("scan router from file system: Nuxt", async () => {
     }
   `);
 });
+
+test("scan router from file system: TanStack Start", async () => {
+  const urls = await scanURLs({
+    preset: "tanstack-start",
+    cwd: path.join(
+      fileURLToPath(import.meta.url),
+      "../fixture/tanstack-start-1",
+    ),
+  });
+
+  expect(urls).toMatchInlineSnapshot(`
+    {
+      "fallbackUrls": [
+        {
+          "meta": {},
+          "url": /\\^\\\\/blog\\\\/\\(\\.\\+\\)\\\\/page\\$/,
+        },
+        {
+          "meta": {},
+          "url": /\\^\\\\/blog\\\\/\\(\\.\\+\\)\\$/,
+        },
+        {
+          "meta": {},
+          "url": /\\^\\\\/docs\\\\/\\(\\.\\+\\)\\$/,
+        },
+      ],
+      "urls": Map {
+        "/about" => {},
+        "/" => {},
+        "/static.json" => {},
+        "/docs" => {},
+      },
+    }
+  `);
+});

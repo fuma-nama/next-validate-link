@@ -2,6 +2,7 @@ import * as Astro from "./presets/astro";
 import * as Next from "./presets/next";
 import * as Nuxt from "./presets/nuxt";
 import * as ReactRouter from "./presets/react-router";
+import * as TanStackStart from "./presets/tanstack-start";
 import * as Waku from "./presets/waku";
 
 export type PopulateParams = Record<
@@ -32,7 +33,7 @@ export type ScanPresetOptions =
       /**
        * @default next
        */
-      preset?: "next" | "astro" | "nuxt" | "waku";
+      preset?: "next" | "astro" | "nuxt" | "waku" | "tanstack-start";
     })
   | ReactRouter.ReactRouterScanOptions;
 
@@ -60,6 +61,8 @@ export async function scanURLs(
       return Nuxt.scanURLs(options);
     case "react-router":
       return ReactRouter.scanURLs(options);
+    case "tanstack-start":
+      return TanStackStart.scanURLs(options);
     case "waku":
       return Waku.scanURLs(options);
     default:
