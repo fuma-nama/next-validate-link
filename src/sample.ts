@@ -1,5 +1,4 @@
 import fs from "node:fs/promises";
-import path from "node:path";
 import matter from "gray-matter";
 import type { FileObject } from "./validate";
 import { glob } from "tinyglobby";
@@ -10,9 +9,7 @@ export async function readFileFromPath(
   file: string,
   pathToUrl?: PathToUrl
 ): Promise<FileObject> {
-  const content = await fs
-    .readFile(path.resolve(file))
-    .then((res) => res.toString());
+  const content = await fs.readFile(file).then((res) => res.toString());
 
   const parsed = matter(content);
 
