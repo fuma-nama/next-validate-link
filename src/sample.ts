@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import matter from "gray-matter";
-import type { FileObject } from "./validate";
 import { glob } from "tinyglobby";
+import type { FileObject } from "./validate";
 
 export type PathToUrl = (path: string) => string | undefined;
 

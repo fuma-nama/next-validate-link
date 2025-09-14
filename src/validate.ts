@@ -2,12 +2,12 @@ import * as path from "node:path";
 import type { ScanResult } from "@/scan";
 import { isExternalUrlValid } from "./check-external-url";
 import { type PathToUrl, readFileFromPath } from "./sample";
+import { isFileExists } from "./utils/fs";
 import { resolveUrl } from "./utils/url";
 import {
   createMarkdownValidator,
   type MarkdownConfig,
 } from "./validate/markdown";
-import { isFileExists } from "./utils/fs";
 
 export interface ValidateResult {
   file: string;
@@ -59,6 +59,11 @@ export interface DetectorConfig {
    * @defaultValue false
    */
   ignoreFragment?: boolean;
+
+  /**
+   * Ignore validating links that match these patterns (string, glob, or regex).
+   */
+  ignorePatterns?: Array<string | RegExp>;
 
   /**
    * don't validate the query of URLs
@@ -173,7 +178,9 @@ export async function validateFiles(
 
     let errors: ValidateError[] = [];
     if (mdExtensions.includes(ext)) {
-      errors = await markdownValidator.validate(file, resolution);
+      errors = await markdownValidator.validate(file, resolution, {
+        ignorePatterns: config.ignorePatterns,
+      });
     } else {
       console.warn(
         `format unsupported: ${ext}, supported: ${supportedExtensions.join(
