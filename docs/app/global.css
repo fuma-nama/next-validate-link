@@ -1,6 +1,6 @@
-@import 'tailwindcss';
-@import 'fumadocs-ui/css/solar.css';
-@import 'fumadocs-ui/css/preset.css';
+@import "tailwindcss";
+@import "fumadocs-ui/css/solar.css";
+@import "fumadocs-ui/css/preset.css";
 
 /* path of `fumadocs-ui` relative to the CSS file */
 @source '../node_modules/fumadocs-ui/dist/**/*.js';
@@ -31,7 +31,7 @@
 }
 
 .typing-animation::after {
-  content: '_';
+  content: "_";
   position: absolute;
   margin-left: 5px;
   animation: cursor 1s infinite;

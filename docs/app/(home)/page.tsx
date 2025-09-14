@@ -1,9 +1,9 @@
-import { buttonVariants } from '@/components/ui/button';
-import { Github } from 'lucide-react';
-import Link from 'next/link';
-import { cn } from '@/lib/utils';
-import packageJson from '../../../package.json';
-import { CodeBlock } from '@/components/codeblock';
+import { Github } from "lucide-react";
+import Link from "next/link";
+import { CodeBlock } from "@/components/codeblock";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import packageJson from "../../../package.json";
 
 const version = packageJson.version;
 
@@ -52,15 +52,14 @@ export default function Page() {
             </p>
             <CodeBlock
               lang="ts"
-              code={`import { scanURLs, printErrors, validateFiles } from 'next-validate-link';
-import fg from 'fast-glob';
+              code={`import { scanURLs, printErrors, readFiles, validateFiles } from 'next-validate-link';
  
 const scanned = await scanURLs({
   preset: 'next'
 });
  
 printErrors(
-  await validateFiles(await fg('content/**/*.{md,mdx}'), {
+  await validateFiles(await readFiles('content/**/*.{md,mdx}'), {
     scanned,
   }),
   true, // exit with code 1 if errors detected
@@ -72,8 +71,8 @@ printErrors(
             <Link
               href="/docs"
               className={cn(
-                buttonVariants({ variant: 'outline' }),
-                'border-border text-muted-foreground hover:bg-border/10',
+                buttonVariants({ variant: "outline" }),
+                "border-border text-muted-foreground hover:bg-border/10"
               )}
             >
               $ cd /docs
@@ -83,8 +82,8 @@ printErrors(
               target="_blank"
               rel="noreferrer noopener"
               className={cn(
-                buttonVariants({ variant: 'outline' }),
-                'border-border text-muted-foreground hover:bg-border/10',
+                buttonVariants({ variant: "outline" }),
+                "border-border text-muted-foreground hover:bg-border/10"
               )}
             >
               <Github className="mr-2 size-4" />

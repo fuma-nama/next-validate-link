@@ -1,9 +1,9 @@
-import { expect, test } from 'vitest';
-import { scanURLs } from '@/scan';
+import { expect, test } from "vitest";
+import { scanURLs } from "@/scan";
 
-test('scan pages', async () => {
+test("scan pages", async () => {
   const scanned = await scanURLs({
-    pages: ['page.tsx', 'docs/page.tsx', 'nested/docs/page.tsx'],
+    pages: ["page.tsx", "docs/page.tsx", "nested/docs/page.tsx"],
   });
 
   expect(scanned).toMatchInlineSnapshot(`
@@ -18,12 +18,12 @@ test('scan pages', async () => {
   `);
 });
 
-test('scan pages with meta', async () => {
+test("scan pages with meta", async () => {
   const scanned = await scanURLs({
-    pages: ['page.tsx', 'docs/page.tsx', 'nested/docs/page.tsx'],
+    pages: ["page.tsx", "docs/page.tsx", "nested/docs/page.tsx"],
     meta: {
-      '/': {
-        hashes: ['test'],
+      "/": {
+        hashes: ["test"],
       },
     },
   });
@@ -44,47 +44,47 @@ test('scan pages with meta', async () => {
   `);
 });
 
-test('scan pages with params', async () => {
+test("scan pages with params", async () => {
   const scanned = await scanURLs({
     pages: [
-      'page.tsx',
-      'docs/page.tsx',
-      'docs/[...slug]/page.tsx',
-      'nested/blog/[slug]/page.tsx',
-      'nested/docs/[[...slug]]/page.tsx',
+      "page.tsx",
+      "docs/page.tsx",
+      "docs/[...slug]/page.tsx",
+      "nested/blog/[slug]/page.tsx",
+      "nested/docs/[[...slug]]/page.tsx",
     ],
     populate: {
-      'docs/[...slug]': [
+      "docs/[...slug]": [
         {
-          value: ['hello'],
+          value: ["hello"],
         },
         {
-          value: ['hello', 'world'],
-          hashes: ['hash'],
+          value: ["hello", "world"],
+          hashes: ["hash"],
           queries: [
             {
-              query: 'value',
+              query: "value",
             },
           ],
         },
       ],
-      'nested/docs/[[...slug]]': [
+      "nested/docs/[[...slug]]": [
         {
-          value: ['hello'],
+          value: ["hello"],
         },
         {
           value: [],
         },
       ],
-      'nested/blog/[slug]': [
+      "nested/blog/[slug]": [
         {
-          value: 'hello',
+          value: "hello",
         },
       ],
     },
     meta: {
-      'page.tsx': {
-        hashes: ['test'],
+      "page.tsx": {
+        hashes: ["test"],
       },
     },
   });
@@ -134,13 +134,13 @@ test('scan pages with params', async () => {
   `);
 });
 
-test('scan pages with dynamic params', async () => {
+test("scan pages with dynamic params", async () => {
   const scanned = await scanURLs({
     pages: [
-      'docs/page.tsx',
-      'docs/[...slug]/page.tsx',
-      'blog/[[...slug]]/page.tsx',
-      '(test)/[[...slug]]/page.tsx',
+      "docs/page.tsx",
+      "docs/[...slug]/page.tsx",
+      "blog/[[...slug]]/page.tsx",
+      "(test)/[[...slug]]/page.tsx",
     ],
   });
 
@@ -169,49 +169,49 @@ test('scan pages with dynamic params', async () => {
   `);
 });
 
-test('scan pages with multiple params', async () => {
+test("scan pages with multiple params", async () => {
   const scanned = await scanURLs({
     pages: [
-      'page.tsx',
-      'projects/[lang]/[id]/page.tsx',
-      'blog/[lang]/[...slug]/page.tsx',
-      'docs/[lang]/[[...slug]]/page.tsx',
+      "page.tsx",
+      "projects/[lang]/[id]/page.tsx",
+      "blog/[lang]/[...slug]/page.tsx",
+      "docs/[lang]/[[...slug]]/page.tsx",
     ],
     populate: {
-      'projects/[lang]/[id]': [
+      "projects/[lang]/[id]": [
         {
           value: {
-            lang: 'en',
-            id: 'hello',
+            lang: "en",
+            id: "hello",
           },
         },
         {
           value: {
-            lang: 'en',
-            id: 'world',
+            lang: "en",
+            id: "world",
           },
         },
         {
           value: {
-            lang: 'cn',
-            id: 'hi',
+            lang: "cn",
+            id: "hi",
           },
         },
       ],
-      'blog/[lang]': [
+      "blog/[lang]": [
         {
-          value: { lang: 'en' },
+          value: { lang: "en" },
         },
         {
-          value: { lang: 'cn' },
+          value: { lang: "cn" },
         },
       ],
-      'docs/[lang]/[[...slug]]': [
+      "docs/[lang]/[[...slug]]": [
         {
-          value: { lang: 'en', slug: ['hello', 'world'] },
+          value: { lang: "en", slug: ["hello", "world"] },
         },
         {
-          value: { lang: 'cn', slug: [] },
+          value: { lang: "cn", slug: [] },
         },
       ],
     },

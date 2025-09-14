@@ -1,13 +1,13 @@
-import { remark } from 'remark';
-import { visit } from 'unist-util-visit';
-import type { ScanResult } from '@/scan';
-import * as path from 'node:path';
-import { checkExternalUrl } from './check-external-url';
-import remarkGfm from 'remark-gfm';
-import { type PathToUrl, readFileFromPath } from './sample';
-import { resolveUrl } from './utils/url';
-
-const processor = remark().use(remarkGfm);
+import * as path from "node:path";
+import type { ScanResult } from "@/scan";
+import { isExternalUrlValid } from "./check-external-url";
+import { type PathToUrl, readFileFromPath } from "./sample";
+import { resolveUrl } from "./utils/url";
+import {
+  createMarkdownValidator,
+  type MarkdownConfig,
+} from "./validate/markdown";
+import { isFileExists } from "./utils/fs";
 
 export interface ValidateResult {
   file: string;
@@ -26,9 +26,9 @@ export interface ValidateError {
   reason: ErrorReason | Error;
 }
 
-export type ErrorReason = 'not-found' | 'invalid-fragment' | 'invalid-query';
+export type ErrorReason = "not-found" | "invalid-fragment" | "invalid-query";
 
-export type ValidateConfig = {
+export interface ResolutionConfig {
   /**
    * Base URL to resolve relative URLs
    */
@@ -39,6 +39,15 @@ export type ValidateConfig = {
    */
   baseDir?: string;
 
+  /**
+   * Generate URL from file paths, used for relative file path detection.
+   *
+   * Default to searching in input files.
+   */
+  pathToUrl?: PathToUrl;
+}
+
+export interface DetectorConfig {
   /**
    * Available URLs (including hashes and query parameters)
    */
@@ -66,11 +75,26 @@ export type ValidateConfig = {
   checkExternal?: boolean;
 
   /**
-   * Generate url for file paths.
+   * Check relative paths (e.g. `[My File](./my-file.md)`)
    *
-   * Required for relative url/file path detection.
+   * - `exists`: ensure the file exists.
+   * - `as-url`: resolve & check the public URL of referenced file, requires one of these to be defined:
+   *    - `pathToUrl` option.
+   *    - `file.url` in input file objects.
+   * - `false` (default): ignore.
    */
-  pathToUrl?: PathToUrl;
+  checkRelativePaths?: "exists" | "as-url" | false;
+
+  /**
+   * Check relative URLs (e.g. `[My File](./my-page)`)
+   *
+   * - `true` (default): resolve & check the relative URL, requires one of these to be defined:
+   *   - `file.url` in input file objects.
+   *   - `pathToUrl` option.
+   *   - `baseUrl` option.
+   * - `false`: ignore.
+   */
+  checkRelativeUrls?: boolean;
 
   /**
    * Allowed hrefs, can be:
@@ -82,13 +106,14 @@ export type ValidateConfig = {
   /**
    * Determinate the type of pathname
    */
-  determinatePathname?: (
-    pathname: string,
-    config: ValidateConfig,
-  ) => Awaitable<PathnameType>;
-};
+  determinatePathname?: (pathname: string) => Awaitable<PathnameType>;
+}
 
-type PathnameType = 'url' | 'relative-file-path' | 'relative-url';
+export interface ValidateConfig extends ResolutionConfig, DetectorConfig {
+  markdown?: MarkdownConfig;
+}
+
+type PathnameType = "url" | "relative-file-path" | "relative-url";
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -104,6 +129,9 @@ export interface FileObject {
   url?: string;
 }
 
+const mdExtensions = [".md", ".mdx"];
+const supportedExtensions = mdExtensions;
+
 /**
  * Validate markdown files
  *
@@ -112,34 +140,50 @@ export interface FileObject {
  */
 export async function validateFiles(
   files: (string | FileObject)[],
-  config: ValidateConfig,
+  config: ValidateConfig
 ): Promise<ValidateResult[]> {
-  const mdExtensions = ['.md', '.mdx'];
+  const detector = createDetector(config);
+  const markdownValidator = createMarkdownValidator(
+    config.markdown ?? {},
+    detector
+  );
 
-  async function run(file: string | FileObject): Promise<ValidateResult> {
-    const resolved =
-      typeof file === 'string'
+  const normalized = await Promise.all(
+    files.map(async (file) =>
+      typeof file === "string"
         ? await readFileFromPath(file, config.pathToUrl)
-        : file;
+        : file
+    )
+  );
+  const defaultPathToUrl: PathToUrl = (path) => {
+    for (const file of normalized) {
+      if (file.path === path && file.url) return file.url;
+    }
+  };
 
-    if (!mdExtensions.includes(path.extname(resolved.path))) {
+  async function run(file: FileObject): Promise<ValidateResult> {
+    const resolution: ResolutionConfig = {
+      baseUrl: file.url
+        ? file.url.split("/").slice(0, -1).join("/")
+        : config.baseUrl,
+      baseDir: path.dirname(file.path),
+      pathToUrl: config.pathToUrl ?? defaultPathToUrl,
+    };
+    const ext = path.extname(file.path);
+
+    let errors: ValidateError[] = [];
+    if (mdExtensions.includes(ext)) {
+      errors = await markdownValidator.validate(file, resolution);
+    } else {
       console.warn(
-        `format unsupported: ${resolved.path}, supported: ${mdExtensions.join(', ')}`,
+        `format unsupported: ${ext}, supported: ${supportedExtensions.join(
+          ", "
+        )}`
       );
-
-      return { file: resolved.path, detected: [], errors: [] };
     }
 
-    const errors = await validateMarkdown(resolved.content, {
-      ...config,
-      baseUrl: resolved.url
-        ? resolved.url.split('/').slice(0, -1).join('/')
-        : config.baseUrl,
-      baseDir: path.dirname(resolved.path),
-    });
-
     return {
-      file: resolved.path,
+      file: file.path,
       errors,
       get detected() {
         return errors.map(generateLegacyError);
@@ -147,143 +191,142 @@ export async function validateFiles(
     };
   }
 
-  return (await Promise.all(files.map(run))).filter(
-    (err) => err.errors.length > 0,
+  return (await Promise.all(normalized.map(run))).filter(
+    (err) => err.errors.length > 0
   );
 }
 
-export async function validateMarkdown(
-  content: string,
-  config: ValidateConfig,
-) {
-  const tree = processor.parse({ value: content });
-  const errors: ValidateError[] = [];
-  const tasks: Promise<void>[] = [];
-
-  visit(tree, 'link', (node) => {
-    // ignore generated nodes
-    if (!node.position) return;
-    const pos = node.position;
-
-    tasks.push(
-      detect(node.url, config)
-        .then((err) => {
-          if (!err) return;
-
-          errors.push({
-            url: node.url,
-            line: pos.start.line,
-            column: pos.start.column,
-            reason: err,
-          });
-        })
-        .catch((err: Error) => {
-          errors.push({
-            url: node.url,
-            line: pos.start.line,
-            column: pos.start.column,
-            reason: err,
-          });
-        }),
-    );
-  });
-
-  await Promise.all(tasks);
-
-  return errors;
+export interface Detector {
+  detect: (
+    href: string,
+    resolution: ResolutionConfig
+  ) => Promise<{ type: "error"; reason: ErrorReason } | undefined>;
 }
 
-export async function detect(
-  href: string,
-  config: ValidateConfig,
-): Promise<ErrorReason | undefined> {
-  const determinatePathname =
-    config.determinatePathname ?? defaultDeterminatePathname;
-  if (href.startsWith('mailto:')) return;
+function createDetector(config: DetectorConfig): Detector {
+  const PathnameRegex = /^([^?#]*)(\?[^#]*)?(#.*)?$/;
+  const {
+    checkRelativePaths = false,
+    checkExternal = false,
+    ignoreFragment = false,
+    ignoreQuery = false,
+    checkRelativeUrls = true,
+    whitelist,
+    determinatePathname = (pathname) => {
+      if (!pathname.startsWith(".")) return "url";
 
-  if (href.match(/https?:\/\//)) {
-    if (config.checkExternal) {
-      return await checkExternalUrl(href);
-    }
+      if (pathname.endsWith(".md") || pathname.endsWith(".mdx")) {
+        return "relative-file-path";
+      }
 
-    return;
+      return "relative-url";
+    },
+  } = config;
+
+  function parsePathname(pathname: string) {
+    const match = PathnameRegex.exec(pathname);
+    if (!match) return { pathname };
+
+    return {
+      pathname: match[1],
+      query: match[2]?.slice(1),
+      fragment: match[3]?.slice(1),
+    };
   }
 
-  if (config.whitelist) {
-    if (Array.isArray(config.whitelist) && config.whitelist.includes(href))
-      return;
-    if (typeof config.whitelist === 'function' && config.whitelist(href))
-      return;
-  }
+  return {
+    async detect(href, { baseDir, baseUrl, pathToUrl }) {
+      if (href.startsWith("mailto:")) return;
 
-  const [pathnameWithQuery, fragment] = href.split('#', 2);
-  let [pathname, query] = pathnameWithQuery.split('?', 2);
+      if (href.match(/https?:\/\//)) {
+        return !checkExternal || (await isExternalUrlValid(href))
+          ? undefined
+          : { type: "error", reason: "not-found" };
+      }
 
-  if (pathname.length === 0 || pathname === './') return;
-  const type = await determinatePathname(pathname, config);
+      if (Array.isArray(whitelist) && whitelist.includes(href)) return;
+      if (typeof whitelist === "function" && whitelist(href)) return;
 
-  if (type === 'relative-url' && config.baseUrl) {
-    pathname = resolveUrl(config.baseUrl, pathname);
-  }
+      let { pathname, query, fragment } = parsePathname(href);
 
-  if (type === 'relative-file-path' && config.pathToUrl) {
-    const filePath = path.join(config.baseDir ?? '', pathname);
-    pathname = config.pathToUrl(filePath);
-  }
+      if (pathname.length === 0 || pathname === "./") return;
+      const type = await determinatePathname(pathname);
 
-  if (!pathname.startsWith('/')) pathname = `/${pathname}`;
+      if (type === "relative-url") {
+        if (!checkRelativeUrls) return;
+        if (!baseUrl)
+          throw new Error(
+            `relative URL ${pathname} detected, but 'baseUrl' option is missing.`
+          );
 
-  let meta = config.scanned.urls.get(pathname);
-  if (!meta) {
-    meta = config.scanned.fallbackUrls.find((fallbackUrl) => {
-      return fallbackUrl.url.test(pathname);
-    })?.meta;
-  }
+        pathname = resolveUrl(baseUrl, pathname);
+      }
 
-  if (!meta) return 'not-found';
+      if (type === "relative-file-path") {
+        const filePath = path.join(baseDir ?? "", pathname);
 
-  const validFragment =
-    config.ignoreFragment ||
-    !fragment ||
-    !meta.hashes ||
-    meta.hashes.includes(fragment);
+        if (!checkRelativePaths) return;
 
-  if (!validFragment) {
-    return 'invalid-fragment';
-  }
+        if (checkRelativePaths === "exists") {
+          return (await isFileExists(filePath))
+            ? undefined
+            : { type: "error", reason: "not-found" };
+        }
 
-  const validQuery =
-    config.ignoreQuery ||
-    !query ||
-    !meta.queries ||
-    meta.queries.some((item) => new URLSearchParams(item).toString() === query);
+        if (checkRelativePaths === "as-url") {
+          if (!pathToUrl)
+            throw new Error(
+              `'checkRelativePaths: as-url' is set, but 'pathToUrl' option is missing.`
+            );
 
-  if (!validQuery) {
-    return 'invalid-query';
-  }
-}
+          const asUrl = pathToUrl(filePath);
+          if (!asUrl) return;
+          pathname = asUrl;
+        }
+      }
 
-async function defaultDeterminatePathname(
-  pathname: string,
-  config: ValidateConfig,
-): Promise<PathnameType> {
-  if (!pathname.startsWith('.')) return 'url';
+      if (!pathname.startsWith("/")) pathname = `/${pathname}`;
+      let meta = config.scanned.urls.get(pathname);
+      if (!meta) {
+        meta = config.scanned.fallbackUrls.find((fallbackUrl) => {
+          return fallbackUrl.url.test(pathname);
+        })?.meta;
+      }
 
-  if (
-    config.pathToUrl &&
-    (pathname.endsWith('.md') || pathname.endsWith('.mdx'))
-  ) {
-    return 'relative-file-path';
-  }
+      if (!meta)
+        return {
+          type: "error",
+          reason: "not-found",
+        };
 
-  return 'relative-url';
+      if (
+        fragment &&
+        !ignoreFragment &&
+        meta.hashes &&
+        !meta.hashes.includes(fragment)
+      ) {
+        return { type: "error", reason: "invalid-fragment" };
+      }
+
+      if (
+        query &&
+        !ignoreQuery &&
+        meta.queries &&
+        !meta.queries.some(
+          (item) => new URLSearchParams(item).toString() === query
+        )
+      ) {
+        return { type: "error", reason: "invalid-query" };
+      }
+    },
+  };
 }
 
 export type DetectedError = [
   url: string,
   line: number,
   column: number,
-  reason: ErrorReason | Error,
+  reason: ErrorReason | Error
 ];
 
 function generateLegacyError(v: ValidateError): DetectedError {

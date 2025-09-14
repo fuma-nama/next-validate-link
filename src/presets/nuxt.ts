@@ -1,25 +1,25 @@
-import type { ScanOptions, ScanResult } from '@/scan';
-import * as path from 'node:path';
-import fg from 'fast-glob';
-import { populateToScanResult } from './shared';
-import { isDirExists } from '@/utils/fs';
+import * as path from "node:path";
+import type { ScanOptions, ScanResult } from "@/scan";
+import { isDirExists } from "@/utils/fs";
+import { populateToScanResult } from "./shared";
+import { glob } from "tinyglobby";
 
 export async function scanURLs(options: ScanOptions = {}): Promise<ScanResult> {
-  const ext = options.extensions ?? ['vue', 'md', 'mdx'];
+  const ext = options.extensions ?? ["vue", "md", "mdx"];
   const cwd = options.cwd ?? process.cwd();
 
   async function getFiles() {
-    const suffix = ext.length > 0 ? `.{${ext.join(',')}}` : '';
+    const suffix = ext.length > 0 ? `.{${ext.join(",")}}` : "";
 
-    const pagesFiles = await fg(`**/*${suffix}`, {
-      cwd: (await isDirExists(path.join(cwd, 'src/pages')))
-        ? path.join(cwd, 'src/pages')
-        : path.join(cwd, 'pages'),
+    const pagesFiles = await glob(`**/*${suffix}`, {
+      cwd: (await isDirExists(path.join(cwd, "src/pages")))
+        ? path.join(cwd, "src/pages")
+        : path.join(cwd, "pages"),
     });
 
     return pagesFiles.map((file) => {
       const parsed = path.parse(file);
-      if (parsed.name === 'index') return parsed.dir;
+      if (parsed.name === "index") return parsed.dir;
 
       return path.join(parsed.dir, parsed.name);
     });

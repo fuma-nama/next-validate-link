@@ -1,5 +1,5 @@
-import picocolors from 'picocolors';
-import type { ValidateResult } from '@/validate';
+import picocolors from "picocolors";
+import type { ValidateResult } from "@/validate";
 
 /**
  * Print validation errors
@@ -22,7 +22,7 @@ export function printErrors(results: ValidateResult[], throwError = false) {
       );
     }
 
-    logs.push(picocolors.dim('------'));
+    logs.push(picocolors.dim("------"));
 
     totalErrors += result.errors.length;
   }
@@ -37,9 +37,9 @@ export function printErrors(results: ValidateResult[], throwError = false) {
   );
 
   if (throwError && totalErrors > 0) {
-    console.error(logs.join('\n'));
+    console.error(logs.join("\n"));
     process.exit(1);
   } else {
-    console.log(logs.join('\n'));
+    console.log(logs.join("\n"));
   }
 }

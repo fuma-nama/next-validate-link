@@ -1,13 +1,13 @@
-import { readFileFromPath } from '@/sample';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { expect, test } from 'vitest';
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { expect, test } from "vitest";
+import { readFileFromPath } from "@/sample";
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
 
-test('read from files with frontmatter', async () => {
+test("read from files with frontmatter", async () => {
   expect(
-    await readFileFromPath(path.join(dir, 'fixture/sample/index.md')),
+    await readFileFromPath(path.join(dir, "fixture/sample/index.md")),
   ).toMatchInlineSnapshot(`
     {
       "content": "

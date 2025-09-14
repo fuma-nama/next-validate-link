@@ -1,6 +1,6 @@
 {
   "name": "next-validate-link",
-  "version": "1.6.0",
+  "version": "1.6.2",
   "description": "An utility to validate links in markdown file",
   "keywords": [
     "NextJs",
@@ -23,29 +23,31 @@
     "build": "tsup",
     "clean": "rimraf dist",
     "dev": "tsup --watch",
-    "lint": "biome lint ./src ./test",
+    "lint": "biome check",
+    "format": "biome format --fix",
     "test": "vitest",
     "types:check": "tsc --noEmit",
-    "lint:prettier": "prettier --cache --check --ignore-path .gitignore --ignore-path .prettierignore .",
-    "prettier": "prettier --cache --write --list-different --ignore-path .gitignore --ignore-path .prettierignore .",
     "release": "pnpm run build && changeset publish",
     "version": "changeset version && pnpm install --lockfile-only"
   },
   "dependencies": {
-    "fast-glob": "^3.3.3",
     "gray-matter": "^4.0.3",
     "picocolors": "^1.1.1",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
+    "remark-mdx": "^3.1.1",
+    "tinyglobby": "^0.2.15",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.3",
-    "@changesets/cli": "^2.29.6",
-    "@types/node": "24.3.1",
-    "prettier": "^3.6.2",
+    "@biomejs/biome": "2.2.4",
+    "@changesets/cli": "^2.29.7",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "24.3.3",
+    "mdast-util-mdx-jsx": "^3.2.0",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",
+    "unified": "^11.0.5",
     "vitest": "^3.2.4"
   },
   "publishConfig": {

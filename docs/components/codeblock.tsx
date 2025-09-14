@@ -1,6 +1,6 @@
-import * as Base from 'fumadocs-ui/components/codeblock';
-import { highlight } from 'fumadocs-core/highlight';
-import { type HTMLAttributes } from 'react';
+import { highlight } from "fumadocs-core/highlight";
+import * as Base from "fumadocs-ui/components/codeblock";
+import type { HTMLAttributes } from "react";
 
 export async function CodeBlock({
   code,
@@ -20,8 +20,8 @@ export async function CodeBlock({
       ),
     },
     themes: {
-      light: 'catppuccin-latte',
-      dark: 'catppuccin-mocha',
+      light: "catppuccin-latte",
+      dark: "catppuccin-mocha",
     },
   });
 }
