@@ -257,3 +257,25 @@ test("validate links: components", async () => {
     ]
   `);
 });
+
+test("validate links: ignore patterns", async () => {
+  expect(
+    await validateFiles(
+      [
+        {
+          path: "a.md",
+          content:
+            "[local](http://localhost:3000)\n[test](https://example.test)\n[real](https://google.com)",
+        },
+      ],
+      { scanned, ignorePatterns: ["localhost", /\.test$/] },
+    ).then(simplify),
+  ).toMatchInlineSnapshot(`
+    [
+      {
+        "errors": [],
+        "file": "a.md",
+      },
+    ]
+  `);
+});

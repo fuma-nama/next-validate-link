@@ -1,9 +1,9 @@
 import * as path from "node:path";
+import type { RouteConfig, RouteConfigEntry } from "@react-router/dev/routes";
+import { glob } from "tinyglobby";
 import type { ScanOptions, ScanResult } from "@/scan";
 import { isDirExists } from "@/utils/fs";
 import { populateToScanResult } from "./shared";
-import { glob } from "tinyglobby";
-import type { RouteConfig, RouteConfigEntry } from "@react-router/dev/routes";
 
 async function getRoutesDir(cwd: string) {
   if (await isDirExists(path.join(cwd, "app/routes"))) {
