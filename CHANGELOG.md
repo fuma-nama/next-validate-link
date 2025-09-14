@@ -1,5 +1,13 @@
 # next-validate-link
 
+## 1.6.2
+
+### Patch Changes
+
+- 77ba13e: Switch to `tinyglobby`
+- 77ba13e: support `checkRelativePaths` & `checkRelativeUrls` options
+- 8b84c15: Support custom remark plugins
+
 ## 1.6.1
 
 ### Patch Changes
