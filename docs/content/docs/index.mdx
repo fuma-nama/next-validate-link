@@ -7,7 +7,7 @@ description: A tool for validating links in Markdown files
 
 Install it.
 
-```package-install
+```npm
 npm i next-validate-link
 ```
 
@@ -140,15 +140,38 @@ await validateFiles(await readFiles('content/**/*.{md,mdx}'), {
 });
 ```
 
-### Relative Urls
+### Relative Paths
 
-To support relative urls, specify a function that generates URL based on file path.
-This will assign a URL to each Markdown file, so that relative URLs can be resolved correctly.
+To check relative paths such as:
+
+```md
+[Test](./another-file.md)
+```
+
+You can specify the `checkRelativePaths` option, allowed values listed below:
+
+#### `exists`
+
+Check if the referenced file exists.
 
 ```ts
-import path from 'node:path';
+import { readFiles, validateFiles } from "next-validate-link";
 
-await validateFiles(await fg('content/**/*.{md,mdx}'), {
+await validateFiles(await readFiles('content/**/*.{md,mdx}'), {
+  checkRelativePaths: 'exists',
+});
+```
+
+#### `as-url`
+
+Resolve the file path as URL, you need to specify a function that generates URL based on file path.
+
+```ts
+import path from "node:path";
+import { readFiles, validateFiles } from "next-validate-link";
+
+await validateFiles(await readFiles('content/**/*.{md,mdx}'), {
+  checkRelativePaths: 'as-url',
   pathToUrl: (file) => {
     // just an example, it should return a pathname/url, like `/slug/of/page`
     return path.dirname(file);
@@ -156,16 +179,34 @@ await validateFiles(await fg('content/**/*.{md,mdx}'), {
 });
 ```
 
-You can also point to a Markdown file:
+Then, the relative path will be checked as a regular URL.
+
+#### `false` (default)
+
+Ignore relative paths.
+
+### Relative URLs
+
+By default, it checks relative URLs such as:
 
 ```md
-[Test](./another-file.md)
+[Test](./my-page)
 ```
 
-It will be resolved into the generated URL of that Markdown file (same as `pathToUrl("./another-file.md"){:js}`).
+When a relative URL is detected, you need to define either:
 
-```md
-[Test](/docs/another-file)
+- `file.url` in input file objects.
+- `pathToUrl` option.
+- `baseUrl` option.
+
+Or you can disable the check:
+
+```ts
+import { readFiles, validateFiles } from "next-validate-link";
+
+await validateFiles(await readFiles('content/**/*.{md,mdx}'), {
+  checkRelativeUrls: false,
+});
 ```
 
 ## Utilities
