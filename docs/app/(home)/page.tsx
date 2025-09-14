@@ -72,7 +72,7 @@ printErrors(
               href="/docs"
               className={cn(
                 buttonVariants({ variant: "outline" }),
-                "border-border text-muted-foreground hover:bg-border/10"
+                "border-border text-muted-foreground hover:bg-border/10",
               )}
             >
               $ cd /docs
@@ -83,7 +83,7 @@ printErrors(
               rel="noreferrer noopener"
               className={cn(
                 buttonVariants({ variant: "outline" }),
-                "border-border text-muted-foreground hover:bg-border/10"
+                "border-border text-muted-foreground hover:bg-border/10",
               )}
             >
               <Github className="mr-2 size-4" />

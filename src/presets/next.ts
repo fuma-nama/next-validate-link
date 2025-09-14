@@ -57,7 +57,7 @@ export async function scanURLs(options: ScanOptions = {}): Promise<ScanResult> {
     populateToScanResult(
       file.length === 0 ? [] : file.split(path.sep),
       options,
-      result
+      result,
     );
   }
 

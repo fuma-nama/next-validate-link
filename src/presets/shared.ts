@@ -94,7 +94,9 @@ export function populate(
       (Array.isArray(param.value) || typeof param.value === "string")
     ) {
       console.warn(
-        `path ${segments.join("/")} requires multiple params, an object value for populate is expected.`,
+        `path ${segments.join(
+          "/",
+        )} requires multiple params, an object value for populate is expected.`,
       );
     }
 
@@ -145,6 +147,16 @@ export function populate(
   return out;
 }
 
+/**
+ * Populate Next-like route file paths
+ *
+ * ```
+ * docs/page
+ * docs/[slug]/[nested]
+ * docs/(group)/[[...optional_catch_all]]
+ * docs/(group)/[...catch_all]
+ * ```
+ */
 export function populateToScanResult(
   segments: string[],
   options: ScanOptions,

@@ -71,8 +71,8 @@ test("validate links: valid", async () => {
       {
         scanned,
         pathToUrl,
-      }
-    ).then(simplify)
+      },
+    ).then(simplify),
   ).toMatchInlineSnapshot(`[]`);
 });
 
@@ -86,8 +86,8 @@ test("validate links: not found", async () => {
 [hello](/doc)`,
         },
       ],
-      { scanned }
-    ).then(simplify)
+      { scanned },
+    ).then(simplify),
   ).toMatchInlineSnapshot(`
     [
       {
@@ -120,8 +120,8 @@ test("validate links: invalid fragments", async () => {
           content: "[hello](/docs/d#invalid)",
         },
       ],
-      { scanned }
-    ).then(simplify)
+      { scanned },
+    ).then(simplify),
   ).toMatchInlineSnapshot(`
     [
       {
@@ -152,8 +152,8 @@ test("validate links: external urls", async () => {
           content: "https://invalid.com",
         },
       ],
-      { scanned, checkExternal: true }
-    ).then(simplify)
+      { scanned, checkExternal: true },
+    ).then(simplify),
   ).toMatchInlineSnapshot(`
     [
       {
@@ -186,8 +186,8 @@ test("validate links: line numbers", async () => {
 some content [line 7](/test)`,
         },
       ],
-      { scanned }
-    ).then(simplify)
+      { scanned },
+    ).then(simplify),
   ).toMatchInlineSnapshot(`
     [
       {
@@ -239,8 +239,8 @@ test("validate links: components", async () => {
             Card: { attributes: ["href"] },
           },
         },
-      }
-    ).then(simplify)
+      },
+    ).then(simplify),
   ).toMatchInlineSnapshot(`
     [
       {

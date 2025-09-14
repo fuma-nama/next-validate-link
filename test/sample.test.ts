@@ -7,7 +7,9 @@ const dir = path.dirname(fileURLToPath(import.meta.url));
 
 test("read from files with frontmatter", async () => {
   expect(
-    await readFileFromPath(path.join(dir, "fixture/sample/index.md")),
+    await readFileFromPath(
+      path.relative(process.cwd(), path.join(dir, "fixture/sample/index.md")),
+    ),
   ).toMatchInlineSnapshot(`
     {
       "content": "
@@ -21,7 +23,7 @@ test("read from files with frontmatter", async () => {
       "data": {
         "title": "Frontmatter",
       },
-      "path": "/Users/xred/dev/next-validate-link/test/fixture/sample/index.md",
+      "path": "test/fixture/sample/index.md",
       "url": undefined,
     }
   `);
