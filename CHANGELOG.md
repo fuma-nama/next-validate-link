@@ -1,5 +1,11 @@
 # next-validate-link
 
+## 1.6.3
+
+### Patch Changes
+
+- d050d9b: Support Waku & React Router presets
+
 ## 1.6.2
 
 ### Patch Changes
