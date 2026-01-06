@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
-    "fumadocs-core": "15.7.11",
+    "fumadocs-core": "16.4.4",
     "fumadocs-docgen": "3.0.0",
     "fumadocs-mdx": "11.9.1",
     "fumadocs-ui": "15.7.11",
