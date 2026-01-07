@@ -1,15 +1,15 @@
-import {
+import type { Node, Root, RootContent } from "mdast";
+import { remark } from "remark";
+import remarkGfm from "remark-gfm";
+import remarkMdx from "remark-mdx";
+import type { PluggableList } from "unified";
+import { visit } from "unist-util-visit";
+import type {
   Detector,
   FileObject,
   ResolutionConfig,
   ValidateError,
 } from "@/validate";
-import { remark } from "remark";
-import remarkGfm from "remark-gfm";
-import { visit } from "unist-util-visit";
-import type { Node, Root, RootContent } from "mdast";
-import remarkMdx from "remark-mdx";
-import type { PluggableList } from "unified";
 
 export interface MarkdownConfig {
   /**

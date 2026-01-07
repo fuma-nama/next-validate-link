@@ -18,7 +18,6 @@ async function checkLinks() {
   const scanned = await scanURLs({
     populate: {
       "(home)/blog/[slug]": blogFiles.map((file) => {
-
         return {
           value: getSlugs(path.relative("content/blog", file.path))[0],
           hashes: getTableOfContents(file.content).map((item) =>
