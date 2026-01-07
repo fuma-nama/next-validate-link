@@ -2,9 +2,6 @@
 @import "fumadocs-ui/css/solar.css";
 @import "fumadocs-ui/css/preset.css";
 
-/* path of `fumadocs-ui` relative to the CSS file */
-@source '../node_modules/fumadocs-ui/dist/**/*.js';
-
 :root {
   --fd-layout-width: 1600px;
 }

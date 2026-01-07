@@ -5,7 +5,7 @@ import {
   DocsDescription,
   DocsPage,
   DocsTitle,
-} from "fumadocs-ui/page";
+} from "fumadocs-ui/layouts/notebook/page";
 import { notFound } from "next/navigation";
 import { source } from "@/lib/source";
 
