@@ -1,6 +1,6 @@
 import path from "node:path";
-import { getTableOfContents } from "fumadocs-core/server";
-import { getSlugs, parseFilePath } from "fumadocs-core/source";
+import { getTableOfContents } from "fumadocs-core/content/toc";
+import { getSlugs } from "fumadocs-core/source";
 import {
   printErrors,
   readFiles,
@@ -15,10 +15,8 @@ async function checkLinks() {
   const scanned = await scanURLs({
     populate: {
       "docs/[[...slug]]": docsFiles.map((file) => {
-        const info = parseFilePath(path.relative("content/docs", file.path));
-
         return {
-          value: getSlugs(info),
+          value: getSlugs(path.relative("content/docs", file.path)),
           hashes: getTableOfContents(file.content).map((item) =>
             item.url.slice(1),
           ),

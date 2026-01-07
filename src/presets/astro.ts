@@ -1,7 +1,7 @@
 import * as path from "node:path";
+import { glob } from "tinyglobby";
 import type { ScanOptions, ScanResult } from "@/scan";
 import { populateToScanResult } from "./shared";
-import { glob } from "tinyglobby";
 
 export async function scanURLs(options: ScanOptions = {}): Promise<ScanResult> {
   const ext = options.extensions ?? ["astro", "md", "mdx"];

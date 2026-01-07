@@ -2,12 +2,12 @@ import * as path from "node:path";
 import type { ScanResult } from "@/scan";
 import { isExternalUrlValid } from "./check-external-url";
 import { type PathToUrl, readFileFromPath } from "./sample";
+import { isFileExists } from "./utils/fs";
 import { resolveUrl } from "./utils/url";
 import {
   createMarkdownValidator,
   type MarkdownConfig,
 } from "./validate/markdown";
-import { isFileExists } from "./utils/fs";
 
 export interface ValidateResult {
   file: string;

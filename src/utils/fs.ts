@@ -11,7 +11,7 @@ export async function isFileExists(file: string) {
   try {
     await fs.access(file);
     return true;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }

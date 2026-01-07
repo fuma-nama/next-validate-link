@@ -1,6 +1,6 @@
 {
   "name": "next-validate-link",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "description": "An utility to validate links in markdown file",
   "keywords": [
     "NextJs",
@@ -40,16 +40,16 @@
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.4",
-    "@changesets/cli": "^2.29.7",
-    "@react-router/dev": "^7.9.1",
+    "@biomejs/biome": "2.3.11",
+    "@changesets/cli": "^2.29.8",
+    "@react-router/dev": "^7.11.0",
     "@types/mdast": "^4.0.4",
     "@types/node": "24.3.3",
     "mdast-util-mdx-jsx": "^3.2.0",
-    "tsup": "^8.5.0",
-    "typescript": "^5.9.2",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
     "unified": "^11.0.5",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.16"
   },
   "publishConfig": {
     "access": "public"

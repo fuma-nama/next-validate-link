@@ -18,7 +18,7 @@ export function printErrors(results: ValidateResult[], throwError = false) {
         error.reason instanceof Error ? error.reason.message : error.reason;
 
       logs.push(
-        `${picocolors.bold(error.url)}: ${message} at line ${error.line} column ${error.column}`,
+        `${picocolors.bold(error.url)}: ${message} at ${result.file}:${error.line}:${error.column}`,
       );
     }
 
