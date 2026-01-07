@@ -1,5 +1,11 @@
 # next-validate-link
 
+## 1.6.4
+
+### Patch Changes
+
+- e8b1df1: Improve error message format to support editor jumping
+
 ## 1.6.3
 
 ### Patch Changes
