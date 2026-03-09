@@ -20,7 +20,7 @@
     "next-validate-link": "workspace:^",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "shiki": "^3.21.0",
+    "shiki": "^4.0.0",
     "tailwind-merge": "^3.4.0",
     "tinyglobby": "^0.2.15"
   },
