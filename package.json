@@ -47,7 +47,7 @@
     "@types/node": "24.3.3",
     "mdast-util-mdx-jsx": "^3.2.0",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.0",
     "unified": "^11.0.5",
     "vitest": "^4.0.16"
   },
