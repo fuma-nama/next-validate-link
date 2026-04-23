@@ -19,9 +19,6 @@ export async function CodeBlock({
         </Base.CodeBlock>
       ),
     },
-    themes: {
-      light: "catppuccin-latte",
-      dark: "catppuccin-mocha",
-    },
+    theme: "catppuccin-mocha",
   });
 }
