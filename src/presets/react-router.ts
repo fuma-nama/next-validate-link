@@ -1,20 +1,6 @@
-import * as path from "node:path";
 import type { RouteConfig, RouteConfigEntry } from "@react-router/dev/routes";
 import type { ScanOptions, ScanResult } from "@/scan";
-import { isDirExists } from "@/utils/fs";
 import { populateToScanResult } from "./shared";
-
-async function _getRoutesDir(cwd: string) {
-  if (await isDirExists(path.join(cwd, "app/routes"))) {
-    return "app/routes";
-  }
-
-  if (await isDirExists(path.join(cwd, "src/routes"))) return "src/routes";
-
-  if (await isDirExists(path.join(cwd, "routes"))) return "routes";
-
-  throw new Error("Failed to check routes");
-}
 
 export interface ReactRouterScanOptions extends ScanOptions {
   preset: "react-router";
