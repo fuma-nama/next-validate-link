@@ -1,4 +1,4 @@
-import type { Node, Root, RootContent } from "mdast";
+import type { Root, RootContent } from "mdast";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkMdx from "remark-mdx";
@@ -27,7 +27,7 @@ export interface MarkdownConfig {
   /**
    * control how URLs are scanned from Markdown content, override all default behaviours.
    */
-  onNode?: (node: Node) => {
+  onNode?: (node: RootContent) => {
     hrefs: string[];
   };
 }
@@ -39,8 +39,7 @@ export function createMarkdownValidator(
   const {
     components = {},
     remarkPlugins = [],
-    onNode = (_node) => {
-      const node = _node as RootContent;
+    onNode = (node) => {
       if (node.type === "link") {
         return {
           hrefs: [node.url],
@@ -94,7 +93,7 @@ export function createMarkdownValidator(
 
       visit(tree, (node) => {
         // ignore generated nodes
-        if (!node.position) return;
+        if (!node.position || node.type === "root") return;
         const pos = node.position;
         const scanned = onNode(node);
         if (!scanned) return;

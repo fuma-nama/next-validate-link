@@ -223,6 +223,14 @@ function createDetector(config: DetectorConfig): Detector {
     },
   } = config;
 
+  let isWhiteListed: ((href: string) => boolean) | undefined;
+  if (typeof whitelist === "function") {
+    isWhiteListed = whitelist;
+  } else if (Array.isArray(whitelist)) {
+    const whitelistSet = new Set(whitelist);
+    isWhiteListed = (href) => whitelistSet.has(href);
+  }
+
   function parsePathname(pathname: string) {
     const match = PathnameRegex.exec(pathname);
     if (!match) return { pathname };
@@ -236,7 +244,7 @@ function createDetector(config: DetectorConfig): Detector {
 
   return {
     async detect(href, { baseDir, baseUrl, pathToUrl }) {
-      if (href.startsWith("mailto:")) return;
+      if (href.startsWith("mailto:") || isWhiteListed?.(href)) return;
 
       if (href.match(/https?:\/\//)) {
         return !checkExternal || (await isExternalUrlValid(href))
@@ -244,44 +252,38 @@ function createDetector(config: DetectorConfig): Detector {
           : { type: "error", reason: "not-found" };
       }
 
-      if (Array.isArray(whitelist) && whitelist.includes(href)) return;
-      if (typeof whitelist === "function" && whitelist(href)) return;
-
       let { pathname, query, fragment } = parsePathname(href);
 
       if (pathname.length === 0 || pathname === "./") return;
-      const type = await determinatePathname(pathname);
 
-      if (type === "relative-url") {
-        if (!checkRelativeUrls) return;
-        if (!baseUrl)
-          throw new Error(
-            `relative URL ${pathname} detected, but 'baseUrl' option is missing.`,
-          );
-
-        pathname = resolveUrl(baseUrl, pathname);
-      }
-
-      if (type === "relative-file-path") {
-        const filePath = path.join(baseDir ?? "", pathname);
-
-        if (!checkRelativePaths) return;
-
-        if (checkRelativePaths === "exists") {
-          return (await isFileExists(filePath))
-            ? undefined
-            : { type: "error", reason: "not-found" };
-        }
-
-        if (checkRelativePaths === "as-url") {
-          if (!pathToUrl)
+      switch (await determinatePathname(pathname)) {
+        case "relative-url":
+          if (!checkRelativeUrls) return;
+          if (!baseUrl)
             throw new Error(
-              `'checkRelativePaths: as-url' is set, but 'pathToUrl' option is missing.`,
+              `relative URL ${pathname} detected, but 'baseUrl' option is missing.`,
             );
+          pathname = resolveUrl(baseUrl, pathname);
+          break;
+        case "relative-file-path": {
+          if (!checkRelativePaths) return;
 
-          const asUrl = pathToUrl(filePath);
-          if (!asUrl) return;
-          pathname = asUrl;
+          const filePath = path.join(baseDir ?? "", pathname);
+          if (checkRelativePaths === "exists") {
+            return (await isFileExists(filePath))
+              ? undefined
+              : { type: "error", reason: "not-found" };
+          } else if (checkRelativePaths === "as-url") {
+            if (!pathToUrl)
+              throw new Error(
+                `'checkRelativePaths: as-url' is set, but 'pathToUrl' option is missing.`,
+              );
+
+            const url = pathToUrl(filePath);
+            if (!url) return;
+            pathname = url;
+          }
+          break;
         }
       }
 

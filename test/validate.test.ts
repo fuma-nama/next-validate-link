@@ -151,8 +151,12 @@ test("validate links: external urls", async () => {
           path: "b.md",
           content: "https://invalid.com",
         },
+        {
+          path: "c.md",
+          content: "https://invalid-2.com",
+        },
       ],
-      { scanned, checkExternal: true },
+      { scanned, checkExternal: true, whitelist: ["https://invalid-2.com"] },
     ).then(simplify),
   ).toMatchInlineSnapshot(`
     [

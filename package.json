@@ -1,6 +1,6 @@
 {
   "name": "next-validate-link",
-  "version": "1.6.4",
+  "version": "1.6.5",
   "description": "An utility to validate links in markdown file",
   "keywords": [
     "NextJs",
@@ -13,16 +13,14 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "packageManager": "pnpm@9.15.1",
+  "packageManager": "pnpm@10.33.1",
   "files": [
     "dist/*"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "clean": "rimraf dist",
-    "dev": "tsup --watch",
+    "dev": "tsdown --watch",
     "lint": "biome check",
     "format": "biome format --fix",
     "test": "vitest",
@@ -33,25 +31,45 @@
   "dependencies": {
     "gray-matter": "^4.0.3",
     "picocolors": "^1.1.1",
+    "unified": "^11.0.5",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-mdx": "^3.1.1",
-    "tinyglobby": "^0.2.15",
-    "unist-util-visit": "^5.0.0"
+    "tinyglobby": "^0.2.16",
+    "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.3.11",
-    "@changesets/cli": "^2.29.8",
-    "@react-router/dev": "^7.11.0",
+    "@biomejs/biome": "2.4.12",
+    "@changesets/cli": "^2.31.0",
+    "@react-router/dev": "^7.14.2",
     "@types/mdast": "^4.0.4",
-    "@types/node": "24.3.3",
+    "@types/node": "25.6.0",
     "mdast-util-mdx-jsx": "^3.2.0",
-    "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
-    "unified": "^11.0.5",
-    "vitest": "^4.0.16"
+    "tsdown": "^0.21.10",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  },
+  "peerDependencies": {
+    "@types/unist": "*",
+    "@types/mdast": "*",
+    "@react-router/dev": "7.x.x"
+  },
+  "peerDependenciesMeta": {
+    "@types/unist": {
+      "optional": true
+    },
+    "@types/mdast": {
+      "optional": true
+    },
+    "@react-router/dev": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"
+  },
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
   }
 }
