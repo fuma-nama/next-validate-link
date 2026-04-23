@@ -13,7 +13,7 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "type": "module",
-  "packageManager": "pnpm@9.15.1",
+  "packageManager": "pnpm@10.33.1",
   "files": [
     "dist/*"
   ],
