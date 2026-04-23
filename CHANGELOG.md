@@ -1,5 +1,11 @@
 # next-validate-link
 
+## 1.6.5
+
+### Patch Changes
+
+- 8b96b9a: Fix whitelist for external links
+
 ## 1.6.4
 
 ### Patch Changes
