@@ -11,11 +11,11 @@
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
-    "fumadocs-core": "16.8.2",
+    "fumadocs-core": "16.8.5",
     "fumadocs-docgen": "3.0.10",
-    "fumadocs-mdx": "14.3.1",
-    "fumadocs-ui": "16.8.2",
-    "lucide-react": "^1.8.0",
+    "fumadocs-mdx": "14.3.2",
+    "fumadocs-ui": "16.8.5",
+    "lucide-react": "^1.11.0",
     "next": "^16.2.4",
     "next-validate-link": "workspace:^",
     "react": "^19.2.5",
@@ -30,7 +30,7 @@
     "@types/node": "25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "postcss": "^8.5.10",
+    "postcss": "^8.5.12",
     "tailwindcss": "^4.2.4",
     "typescript": "^6.0.3"
   }

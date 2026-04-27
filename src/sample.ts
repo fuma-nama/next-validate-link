@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
-import matter from "gray-matter";
 import { glob } from "tinyglobby";
 import type { FileObject } from "./validate";
+import { frontmatter } from "./utils/frontmatter";
 
 export type PathToUrl = (path: string) => string | undefined;
 
@@ -9,13 +9,12 @@ export async function readFileFromPath(
   file: string,
   pathToUrl?: PathToUrl,
 ): Promise<FileObject> {
-  const content = await fs.readFile(file).then((res) => res.toString());
-
-  const parsed = matter(content);
+  const content = await fs.readFile(file, "utf-8");
+  const parsed = frontmatter(content);
 
   return {
     path: file,
-    data: parsed.data,
+    data: parsed.data as object | undefined,
     // apply offset to ensure line numbers are correct
     content:
       "\n".repeat(countLine(content) - countLine(parsed.content)) +
