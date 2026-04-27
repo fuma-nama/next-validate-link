@@ -1,5 +1,11 @@
 # next-validate-link
 
+## 1.6.6
+
+### Patch Changes
+
+- e2fc67e: Support custom config for external link validation
+
 ## 1.6.5
 
 ### Patch Changes
