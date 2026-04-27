@@ -165,7 +165,7 @@ test("validate links: external urls", async () => {
           {
             "column": 1,
             "line": 1,
-            "reason": "not-found",
+            "reason": [Error: fetch failed],
             "url": "https://invalid.com",
           },
         ],
