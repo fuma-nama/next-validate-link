@@ -136,9 +136,9 @@ const scanned = await scanURLs({
 });
 ```
 
-### External Urls
+### External URLs
 
-To validate external urls, enable it.
+To validate external URLs, enable `checkExternal`.
 
 ```ts
 import { validateFiles, readFiles } from 'next-validate-link';
@@ -146,6 +146,21 @@ import { validateFiles, readFiles } from 'next-validate-link';
 await validateFiles(await readFiles('content/**/*.{md,mdx}'), {
   scanned,
   checkExternal: true,
+});
+```
+
+You can pass custom functions to validate external URLs.
+
+```ts
+import { validateFiles, readFiles } from 'next-validate-link';
+
+await validateFiles(await readFiles('content/**/*.{md,mdx}'), {
+  scanned,
+  checkExternal: {
+    async validate(url) {
+      return { success: true }
+    }
+  },
 });
 ```
 

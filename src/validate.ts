@@ -1,6 +1,5 @@
 import * as path from "node:path";
 import type { ScanResult } from "@/scan";
-import { isExternalUrlValid } from "./check-external-url";
 import { type PathToUrl, readFileFromPath } from "./sample";
 import { isFileExists } from "./utils/fs";
 import { resolveUrl } from "./utils/url";
@@ -8,6 +7,7 @@ import {
   createMarkdownValidator,
   type MarkdownConfig,
 } from "./validate/markdown";
+import { externalLink, type ExternalLinkConfig } from "./utils/external-link";
 
 export interface ValidateResult {
   file: string;
@@ -72,7 +72,7 @@ export interface DetectorConfig {
    *
    * @defaultValue false
    */
-  checkExternal?: boolean;
+  checkExternal?: boolean | ExternalLinkConfig;
 
   /**
    * Check relative paths (e.g. `[My File](./my-file.md)`)
@@ -200,7 +200,7 @@ export interface Detector {
   detect: (
     href: string,
     resolution: ResolutionConfig,
-  ) => Promise<{ type: "error"; reason: ErrorReason } | undefined>;
+  ) => Promise<{ type: "error"; reason: Error | ErrorReason } | undefined>;
 }
 
 function createDetector(config: DetectorConfig): Detector {
@@ -222,6 +222,10 @@ function createDetector(config: DetectorConfig): Detector {
       return "relative-url";
     },
   } = config;
+  const externalLinkChecker =
+    checkExternal === false
+      ? null
+      : externalLink(typeof checkExternal === "object" ? checkExternal : {});
 
   let isWhiteListed: ((href: string) => boolean) | undefined;
   if (typeof whitelist === "function") {
@@ -247,9 +251,15 @@ function createDetector(config: DetectorConfig): Detector {
       if (href.startsWith("mailto:") || isWhiteListed?.(href)) return;
 
       if (href.match(/https?:\/\//)) {
-        return !checkExternal || (await isExternalUrlValid(href))
-          ? undefined
-          : { type: "error", reason: "not-found" };
+        if (!externalLinkChecker) return;
+
+        const result = await externalLinkChecker(href);
+        if (result.success) return;
+
+        return {
+          type: "error",
+          reason: result.message ? new Error(result.message) : "not-found",
+        };
       }
 
       let { pathname, query, fragment } = parsePathname(href);
@@ -334,3 +344,8 @@ export type DetectedError = [
 function generateLegacyError(v: ValidateError): DetectedError {
   return [v.url, v.line, v.column, v.reason];
 }
+
+export type {
+  ExternalLinkConfig,
+  ExternalLinkResult,
+} from "./utils/external-link";

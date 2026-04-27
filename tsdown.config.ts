@@ -8,5 +8,5 @@ export default defineConfig({
   exports: true,
   deps: {
     onlyBundle: [],
-  }
+  },
 });
