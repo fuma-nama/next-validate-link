@@ -103,7 +103,7 @@ export function createMarkdownValidator(
             detector
               .detect(href, resolution)
               .then((err) => {
-                if (!err || err.type !== "error") return;
+                if (err?.type !== "error") return;
 
                 errors.push({
                   url: href,

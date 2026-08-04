@@ -1,3 +1,4 @@
 {
-  "pages": ["index", "---Frameworks---", "..."]
+  "pages": ["index", "---Frameworks---", "..."],
+  "root": true
 }

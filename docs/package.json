@@ -2,36 +2,38 @@
   "name": "docs",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
+  "sideEffects": false,
   "scripts": {
-    "build": "next build --turbo",
-    "dev": "next dev --turbo",
-    "start": "next start",
+    "dev": "waku dev",
+    "build": "waku build",
+    "start": "waku start",
     "types:check": "tsc --noEmit",
-    "postinstall": "fumadocs-mdx"
+    "lint": "node --experimental-strip-types ./scripts/lint.ts"
   },
   "dependencies": {
-    "class-variance-authority": "^0.7.1",
-    "fumadocs-core": "16.8.5",
-    "fumadocs-docgen": "3.0.10",
-    "fumadocs-mdx": "14.3.2",
-    "fumadocs-ui": "16.8.5",
-    "lucide-react": "^1.11.0",
-    "next": "^16.2.4",
+    "@base-ui/react": "^1.6.0",
+    "@fumari/sponsors": "0.1.1",
+    "cnfast": "^0.1.0",
+    "fumadocs-core": "^16.14.0",
+    "fumadocs-mdx": "^15.2.2",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@^16.14.0",
+    "fumapress": "1.0.0-beta.1",
+    "lucide-react": "^1.28.0",
     "next-validate-link": "workspace:^",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
-    "shiki": "^4.0.2",
-    "tailwind-merge": "^3.5.0",
-    "tinyglobby": "^0.2.16"
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-server-dom-webpack": "^19.2.8",
+    "waku": "1.0.0-beta.8"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.4",
-    "@types/mdx": "^2.0.13",
-    "@types/node": "25.6.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "postcss": "^8.5.12",
-    "tailwindcss": "^4.2.4",
-    "typescript": "^6.0.3"
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.0"
   }
 }

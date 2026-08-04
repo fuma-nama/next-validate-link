@@ -1,3 +1,16 @@
 packages:
   - .
   - docs
+allowBuilds:
+  esbuild: true
+  sharp: true
+minimumReleaseAgeExclude:
+  - "@hono/node-server"
+  - "@rolldown/*"
+  - "@takumi-rs/*"
+  - fumapress
+  - hono
+  - nanoid
+  - rolldown
+  - takumi-js
+  - terser
