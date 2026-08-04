@@ -1,3 +1,7 @@
+## next-validate-link@1.6.7
+
+### Bump deps
+
 # next-validate-link
 
 ## 1.6.6
