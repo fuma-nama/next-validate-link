@@ -10,6 +10,7 @@
     "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
+    "@fumari/sponsors": "0.1.0",
     "class-variance-authority": "^0.7.1",
     "fumadocs-core": "16.8.5",
     "fumadocs-docgen": "3.0.10",

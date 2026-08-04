@@ -8,6 +8,7 @@ import {
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { notFound } from "next/navigation";
 import { getPageImage, source } from "@/lib/source";
+import { SponsorsMarquee } from "@fumari/sponsors";
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -19,7 +20,11 @@ export default async function Page(props: {
   const MDX = page.data.body;
 
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
+    <DocsPage
+      toc={page.data.toc}
+      full={page.data.full}
+      tableOfContent={{ footer: <SponsorsMarquee /> }}
+    >
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
