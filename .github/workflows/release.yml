@@ -6,6 +6,7 @@ on:
       - dev
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
+
 permissions:
   id-token: write
   contents: write
@@ -13,10 +14,12 @@ permissions:
 
 jobs:
   release:
-    name: Release
+    name: Version & publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
 
@@ -29,11 +32,7 @@ jobs:
       - name: Install Dependencies
         run: pnpm i --frozen-lockfile
 
-      - name: Create Release Pull Request or Publish to npm
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          publish: pnpm run release
-          version: pnpm run version
+      - name: Version & Publish Packages
+        run: pnpm tegami ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

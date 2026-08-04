@@ -1,21 +1,26 @@
-import Link from "next/link";
-import { CodeBlock } from "@/components/codeblock";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Link } from "fumapress/client";
+import { buttonVariants } from "fumadocs-ui/components/ui/button";
+import { CodeBlock } from "../../components/codeblock";
 import packageJson from "../../../package.json";
+import { cn } from "cnfast";
 
 const version = packageJson.version;
 
 export default function Page() {
   return (
-    <main className="flex-1 font-mono py-8 md:px-4">
-      <div className="container mx-auto max-w-4xl">
+    <>
+      <title>next-validate-link</title>
+      <meta
+        name="description"
+        content="A tool to validate links in Markdown files of your Next.js app"
+      />
+      <main className="flex-1 font-mono">
         <div className="border rounded-lg p-6 mb-8">
           <div className="flex items-center mb-4 border-b pb-2">
             <div className="flex gap-2">
-              <div className="size-3 rounded-full bg-red-500"></div>
-              <div className="size-3 rounded-full bg-yellow-500"></div>
-              <div className="size-3 rounded-full bg-green-500"></div>
+              <div className="size-3 rounded-full bg-red-500" />
+              <div className="size-3 rounded-full bg-yellow-500" />
+              <div className="size-3 rounded-full bg-green-500" />
             </div>
             <div className="ml-4 text-sm">terminal@fuma-nama:~</div>
           </div>
@@ -82,7 +87,7 @@ printErrors(
               rel="noreferrer noopener"
               className={cn(
                 buttonVariants({ variant: "outline" }),
-                "border-border text-muted-foreground hover:bg-border/10",
+                "border-border text-muted-foreground gap-1.5 hover:bg-border/10",
               )}
             >
               <svg
@@ -112,7 +117,7 @@ printErrors(
             <li>Generates validation report</li>
           </ul>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
